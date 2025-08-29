@@ -1,0 +1,204 @@
+﻿@page "/admin/products/edit/{id:long}"
+@page "/admin/products/create"
+@inherits OwningComponentBase<IStoreRepository>
+@using Microsoft.AspNetCore.Components.Forms
+@inject IWebHostEnvironment Env
+
+<style>
+    div.validation-message { color: rgb(220, 53, 69); font-weight: 500 }
+	
+	.white-glow-text {
+		
+		font-weight: bold;
+		font-style: italic;
+		background: linear-gradient(135deg, #ffffff, #ffffff, #fefefe, #ffffff);
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+		text-shadow: 3px 3px 8px rgba(255, 255, 255, 1),
+					-3px -3px 8px rgba(255, 255, 255, 0.8),
+					0 0 10px rgba(255, 255, 255, 0.9);
+		letter-spacing: 2px;
+		text-transform: uppercase;
+	}
+	
+	.product-container {
+    background: rgba(0, 0, 0, 0.8); /* Stronger dark overlay */
+    padding: 25px;
+    border-radius: 10px;
+    max-width: 600px;
+    margin: auto;
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.6); /* Glow effect */
+	}
+	
+	.hidden-file-input {
+    opacity: 0;
+    position: absolute;
+    left: -9999px;
+	}
+	
+	.section-label {
+    color: #0ff;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+	}
+	
+	/* Amber Edit Button Glow */
+	.bg-warning {
+		background: rgba(255, 191, 0, 0.8); 
+		border-color: rgba(255, 191, 0, 0.8); 
+		box-shadow: 0 0 15px rgba(255, 191, 0, 1); 
+	}
+	
+	/* Cyan Details Button Glow */
+	.bg-primary {
+		background: rgba(0, 255, 255, 0.8);
+		border-color: rgba(0, 255, 255, 0.8);
+		box-shadow: 0 0 15px rgba(0, 255, 255, 1);
+	}
+	
+	.custom-header {
+        text-align: center;
+        font-size: 1.75rem;
+        margin-bottom: 1rem;
+        padding: 0.75rem;
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 12px;
+        box-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+        color: #000;
+    }
+
+	
+</style>
+
+<h3 class="custom-header">
+    @TitleText a Product
+</h3>
+
+<EditForm Model="Product" OnValidSubmit="SaveProduct" class="product-container">
+    <DataAnnotationsValidator />
+
+    @if (Product.ProductID.HasValue && Product.ProductID.Value != 0)
+    {
+        <div class="form-group">
+            <label class="white-glow-text">ID</label>
+            <input class="form-control" disabled value="@Product.ProductID" />
+        </div>
+    }
+
+    <div class="form-group">
+        <label class="white-glow-text">Name</label>
+        <ValidationMessage For="@(() => Product.Name)" />
+        <InputText class="form-control" @bind-Value="Product.Name" />
+    </div>
+
+    <div class="form-group">
+        <label class="white-glow-text">Description</label>
+        <ValidationMessage For="@(() => Product.Description)" />
+        <InputText class="form-control" @bind-Value="Product.Description" />
+    </div>
+
+    <div class="form-group">
+        <label class="white-glow-text">Category</label>
+        <ValidationMessage For="@(() => Product.Category)" />
+        <InputText class="form-control" @bind-Value="Product.Category" />
+    </div>
+
+    <div class="form-group">
+        <label class="white-glow-text">Price</label>
+        <ValidationMessage For="@(() => Product.Price)" />
+        <InputNumber class="form-control" @bind-Value="Product.Price" />
+    </div>
+
+    <!-- Image Filename (optional) -->
+    <div class="form-group">
+        <label class="white-glow-text">Image Filename</label>
+        <InputText class="form-control" @bind-Value="Product.Image" />
+    </div>
+
+    <!-- Image Upload -->
+    <div class="form-group mt-3">
+    <label class="white-glow-text section-label" >Upload New Image</label>
+     <!-- custom-file-upload class added here just in case any future changes are needed to be made. -->
+	<div class="custom-file-upload">
+        <label class="btn btn-outline-info">
+            Choose File
+            <InputFile OnChange="HandleImageUpload" class="hidden-file-input" />
+        </label>
+        @if (uploadedFile != null)
+        {
+            <p class="text-success mt-1">Uploaded: @uploadedFile.Name</p>
+        }
+    </div>
+</div>
+
+
+    <!-- Preview -->
+    @if (!string.IsNullOrEmpty(Product.Image))
+    {
+        <div class="mb-3">
+            <label class="white-glow-text section-label">Image Preview:</label><br />
+            <img src="@($"/images/{Product.Image}")"
+                 alt="Preview"
+                 style="max-height: 150px; border-radius: 8px; box-shadow: 0 0 6px #000;" />
+        </div>
+    }
+
+    <div class="mt-2">
+        <button type="submit" class="btn btn-@ThemeColor">Save</button>
+        <NavLink class="btn btn-secondary" href="/admin/products">Cancel</NavLink>
+    </div>
+</EditForm>
+
+@code {
+    public IStoreRepository Repository => Service;
+
+    [Inject]
+    public NavigationManager? NavManager { get; set; }
+
+    [Parameter]
+    public long Id { get; set; } = 0;
+
+    public Product Product { get; set; } = new Product();
+
+    private IBrowserFile? uploadedFile;
+
+    protected override void OnParametersSet()
+    {
+        if (Id != 0)
+        {
+            Product = Repository.Products.FirstOrDefault(p => p.ProductID == Id) ?? new();
+        }
+    }
+
+    private async Task HandleImageUpload(InputFileChangeEventArgs e)
+    {
+        uploadedFile = e.File;
+        var uploadsFolder = Path.Combine(Env.WebRootPath, "images");
+        var filePath = Path.Combine(uploadsFolder, uploadedFile.Name);
+
+        Directory.CreateDirectory(uploadsFolder);
+
+        await using var fs = File.Create(filePath);
+        await uploadedFile.OpenReadStream().CopyToAsync(fs);
+
+        Product.Image = uploadedFile.Name;
+    }
+
+    public void SaveProduct()
+    {
+        if (Id == 0)
+        {
+            Repository.CreateProduct(Product);
+        }
+        else
+        {
+            Repository.SaveProduct(Product);
+        }
+
+        NavManager?.NavigateTo("/admin/products");
+    }
+
+    public string ThemeColor => Id == 0 ? "primary" : "warning";
+    public string TitleText => Id == 0 ? "Create" : "Edit";
+}

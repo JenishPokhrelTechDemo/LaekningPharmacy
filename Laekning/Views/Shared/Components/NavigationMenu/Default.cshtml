@@ -1,0 +1,13 @@
+@model IEnumerable<string>
+
+<div class="dropdown-menu" aria-labelledby="productsDropdown">
+    @foreach (var category in Model ?? Enumerable.Empty<string>())
+    {
+        <a class="dropdown-item @(category == ViewBag.SelectedCategory ? "active" : "")"
+           asp-action="Index" asp-controller="Home"
+           asp-route-category="@category"
+           asp-route-productPage="1">
+            @category
+        </a>
+    }
+</div>

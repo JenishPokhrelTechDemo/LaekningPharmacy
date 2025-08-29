@@ -1,0 +1,154 @@
+﻿@page
+@model CartModel
+
+<style>
+    .table {
+		background: linear-gradient(135deg, rgba(0, 255, 255, 0.3), rgba(0, 139, 139, 0.6));
+		backdrop-filter: blur(20px) brightness(1.3);
+		-webkit-backdrop-filter: blur(20px) brightness(1.3);
+		border-radius: 15px;
+		border: 1px solid rgba(0, 255, 255, 0.5);
+		box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
+		color: white;
+		text-shadow: 0 0 8px rgba(0, 255, 255, 1);
+	}
+
+	.table th,
+	.table td {
+		background: rgba(0, 139, 139, 0.4);
+		border: 1px solid rgba(0, 255, 255, 0.4);
+	}
+
+	.table th {
+		font-weight: bold;
+		text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+	}
+
+	/* Stronger Neon Glow for Buttons */
+	.btn-primary, .btn-secondary {
+		background: rgba(0, 0, 0, 0.8);
+		border: 2px solid rgba(0, 255, 255, 0.8);
+		box-shadow: 0 0 15px rgba(0, 255, 255, 1);
+		transition: 0.3s ease-in-out;
+		font-weight: bold;
+	}
+
+	.btn-primary:hover {
+		background: rgba(0, 255, 255, 0.8);
+		box-shadow: 0 0 25px rgba(0, 255, 255, 1);
+		color: black;
+	}
+
+	/* Magenta Remove Button Glow */
+	.btn-secondary {
+		border-color: rgba(255, 0, 255, 0.8);
+		box-shadow: 0 0 15px rgba(255, 0, 255, 1);
+	}
+
+	.btn-secondary:hover {
+		background: rgba(255, 0, 255, 0.8);
+		box-shadow: 0 0 25px rgba(255, 0, 255, 1);
+		color: black;
+	}
+
+	/* Stronger Silver Glow Text */
+	.silver-text {
+		font-family: "Copperplate Gothic Bold", "Gloock", serif;
+		font-weight: bold;
+		font-style: italic;
+		background: linear-gradient(135deg, #e6e6e6, #ffffff, #bfbfbf, #f2f2f2);
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+		text-shadow: 3px 3px 8px rgba(255, 255, 255, 0.8),
+					-3px -3px 8px rgba(150, 150, 150, 0.4);
+		letter-spacing: 2px;
+		text-transform: uppercase;
+	}
+	
+	.product-img {
+	width: 140px;
+	height: 140px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: white;
+	padding: 5px;
+	border-radius: 8px;
+	overflow: hidden;
+	margin: auto; /* centers the cell content */
+	}
+
+	.product-img img {
+		max-width: 100%;
+		max-height: 100%;
+		object-fit: contain;
+		display: block;
+	}	
+
+
+
+
+}
+
+</style>
+
+
+
+<h2 class="silver-text">Your cart</h2>
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Quantity</th>
+            <th>Item</th>
+			<th>Illustration</th>
+            <th class="text-right">Price</th>
+            <th class="text-right">Subtotal</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var line in Model.Cart?.Lines 
+                    ?? Enumerable.Empty<CartLine>()) {
+            <tr>
+                <td class="text-center">@line.Quantity</td>
+                <td class="text-left">@line.Product.Name</td>
+				<td><div class="product-img"><img src="~/images/@line.Product.Image" alt="@line.Product.Name" /></div></td>
+                <td class="text-right">
+                    @line.Product.Price.ToString("c")
+                </td>
+                <td class="text-right">
+                    @((line.Quantity * line.Product.Price).ToString("c"))
+                </td>
+				
+				<td class="text-center">
+					<form asp-page-handler="Remove" method="post">
+						<input type="hidden" name="ProductID"
+							value="@line.Product.ProductID" />
+						<input type="hidden" name="returnUrl"
+							value="@Model?.ReturnUrl" />
+						<button type="submit" 
+								class="btn btn-sm btn-secondary">
+						Remove
+						</button>
+					</form>
+				</td>
+            </tr>
+        }
+    </tbody>
+    <tfoot>
+        <tr>
+            <td colspan="3" class="text-right">Total:</td>
+            <td class="text-right">
+                @Model.Cart?.ComputeTotalValue().ToString("c")
+            </td>
+        </tr>
+    </tfoot>
+</table>
+
+<div class="text-center">
+    <a class="btn btn-primary" href="@Model.ReturnUrl">
+        Continue shopping
+    </a>
+	<a class="btn btn-primary" asp-action="Checkout" asp-controller="Order">
+        Checkout
+    </a>
+</div>

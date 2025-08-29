@@ -1,0 +1,202 @@
+@page
+@model SupportModel
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Support</title>
+    <link href="/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+	<link href="/lib/font-awesome/css/all.min.css" rel="stylesheet" />
+    <style>
+	
+		.content {
+			width: 100%;
+			min-height: 30px;
+            flex-grow: 1;
+            background-color: rgba(0, 0, 0, 0.6); 
+            padding: 20px;
+            border-radius: 10px;
+			text-align: center;
+            box-shadow:  0 4px 10px rgba(0, 255, 255, 0.3);
+			backdrop-filter: blur(8px);
+		}
+		
+        .support-container {
+            display: flex;
+            flex-direction: row;
+            gap: 20px;
+            padding: 20px;
+			align-items: stretch;
+        }
+
+        .support-sidebar {
+            width: 250px;
+			min-height: 300px;
+            background-color: rgba(0, 0, 0, 0.6); 
+            padding: 15px;
+            border-radius: 8px;
+			box-shadow:  0 4px 10px rgba(0, 255, 255, 0.3);
+			backdrop-filter: blur(8px);
+        }
+
+        .support-content {
+			width: 100%;
+			min-height: 300px;
+            flex-grow: 1;
+            background-color: rgba(0, 0, 0, 0.6); 
+            padding: 20px;
+            border-radius: 10px;
+			text-align: center;
+            box-shadow:  0 4px 10px rgba(0, 255, 255, 0.3);
+			backdrop-filter: blur(8px);
+        }
+		
+			
+		
+	
+		
+		
+		
+		/* Azure navbar */
+        .navbar-custom {
+            background-color: #F0FFFF;
+            padding: 10px 20px;
+        }
+
+        /* Logo */
+        .navbar-brand img {
+            height: 45px;
+            max-width: 265px;
+        }
+
+        /* Navigation links */
+        .nav-link {
+            color: #333;
+            font-weight: 500;
+        }
+
+        .nav-link:hover {
+            color: 	#7DF9FF; /* Electric Blue */
+        }
+
+        /* Search Bar */
+        .search-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .search-input {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 5px;
+        }
+
+        /* Align icons */
+        .navbar-icons {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .navbar-icons a {
+            color: #44D1C0;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .cart-icon {
+            background: #333;
+            color: white;
+            padding: 5px 8px;
+            border-radius: 5px;
+        }
+		
+		
+
+		
+		.silver-text {
+			font-family: "Copperplate Gothic Bold", "Gloock", serif; /* Fallback to Gloock if Copperplate is unavailable */
+			font-weight: bold;
+			font-style: italic;
+			background: linear-gradient(135deg, #d9d9d9, #ffffff, #a6a6a6, #e0e0e0);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 2px 2px 5px rgba(255, 255, 255, 0.6),
+                 -2px -2px 5px rgba(100, 100, 100, 0.3);
+    letter-spacing: 2px; /* Gives that wide, bold look */
+    text-transform: uppercase; /* Makes it all caps like Copperplate */
+		}
+		
+		.silver-text-heading {
+			font-family: "Copperplate Gothic Bold", "Gloock", serif; /* Fallback to Gloock if Copperplate is unavailable */
+			font-weight: bold;
+	
+			background: linear-gradient(135deg, #d9d9d9, #ffffff, #a6a6a6, #e0e0e0);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 2px 2px 5px rgba(255, 255, 255, 0.6),
+                 -2px -2px 5px rgba(100, 100, 100, 0.3);
+    letter-spacing: 2px; /* Gives that wide, bold look */
+  
+		}
+		
+		.silver-text-subtext {
+			font-family: "Copperplate Gothic Bold", "Gloock", serif; /* Fallback to Gloock if Copperplate is unavailable */
+			background: linear-gradient(135deg, #d9d9d9, #ffffff, #a6a6a6, #e0e0e0);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 2px 2px 5px rgba(255, 255, 255, 0.6),
+                 -2px -2px 5px rgba(100, 100, 100, 0.3);
+    letter-spacing: 2px; 
+  
+		}
+		
+		.cyan-text {
+    color: #00FFFF; /* Neon Cyan */
+    font-weight: bold;
+    text-decoration: none; /* Remove default underline */
+    transition: color 0.3s ease, text-shadow 0.3s ease;
+}
+
+/* Hover effect for better visibility */
+.cyan-text:hover {
+    color: #00FF7F; /* Neon Green on hover */
+    text-shadow: 0px 0px 5px rgba(0, 255, 255, 0.8); /* Subtle glowing effect */
+    text-decoration: underline; /* Only underline on hover */
+}
+
+
+
+
+
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <div class="content"><h2 class="silver-text">Support Center</h2></div>
+        <div class="support-container">
+            <!-- Sidebar -->
+            <div class="support-sidebar">
+                <h5 class="silver-text">Support Options</h5>
+                <ul class="list-group">
+                    @foreach (var option in Model.SupportOptions)
+                    {
+                        <li class="list-group-item">
+                            <a asp-page="/Support" asp-route-option="@option.Name" class="cyan-text">@option.Name</a>
+                        </li>
+                    }
+                </ul>
+            </div>
+
+            <!-- Dynamic Content Section -->
+            <div class="support-content">
+                <h4 class="silver-text-heading">@Model.SelectedOption</h4>
+                <p class="silver-text-subtext">@Model.OptionDetails</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

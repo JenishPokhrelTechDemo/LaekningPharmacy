@@ -1,0 +1,201 @@
+﻿@model LoginModel
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Laekning</title>
+    <link href="/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+</head>
+
+
+
+<nav class="navbar navbar-expand-lg navbar-light navbar-custom">
+    <div class="container-fluid d-flex justify-content-between align-items-center">
+        <!-- Left Section: Logo -->
+        <a class="navbar-brand" href="/Page1">
+            <img src="/images/logo-removebg-preview.png" alt="Laekning Logo">
+        </a>
+    </div>
+</nav>
+
+
+
+<body>
+    <div class="m-1 p-1">
+        <div class="text-danger" asp-validation-summary="All"></div>
+
+        <form asp-action="Login" asp-controller="Account" method="post">
+            <input type="hidden" asp-for="ReturnUrl" />
+            <div class="form-group">
+                <label asp-for="Name"></label>
+                <input asp-for="Name" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label asp-for="Password"></label>
+                <input asp-for="Password" type="password" 
+                    class="form-control" />
+            </div>
+            <button class="btn btn-primary mt-2" type="submit">
+                Log In
+            </button>
+        </form>
+    </div>
+</body>
+</html>
+
+
+
+<style>
+    /* Ensure background styling */
+    body {
+        background-image: url('/images/molecular-illustration.jpg'); /* Ensure correct path */
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+    }
+	
+	    /* Darken the form background for contrast */
+.checkout-container {
+    background: rgba(0, 0, 0, 0.8); /* Stronger dark overlay */
+    padding: 25px;
+    border-radius: 10px;
+    max-width: 600px;
+    margin: auto;
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.6); /* Glow effect */
+}
+
+/* Make input fields more visible */
+.form-control {
+    background: rgba(255, 255, 255, 0.2); /* Semi-transparent but readable */
+    color: #ffffff;
+    border: 2px solid rgba(0, 255, 255, 0.9);
+    padding: 12px;
+    font-size: 16px;
+    border-radius: 6px;
+}
+
+/* Ensure placeholders are visible */
+.form-control::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+/* Improve text readability */
+.silver-text, .silver-text-heading, .silver-text-subtext {
+    color: #ffffff;
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.9), 0 0 15px rgba(100, 100, 100, 0.5);
+}
+
+/* More prominent button */
+.btn-primary {
+    background: rgba(0, 255, 255, 1);
+    color: black;
+    font-weight: bold;
+    padding: 10px 20px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 255, 255, 1);
+    transition: all 0.3s ease-in-out;
+}
+
+.btn-primary:hover {
+    background: rgba(0, 255, 255, 1);
+    box-shadow: 0 0 20px rgba(0, 255, 255, 1);
+}
+
+/* Make labels stand out */
+label {
+    font-size: 16px;
+    font-weight: bold;
+    color: white;
+}
+
+/* Glassy Checkout Form */
+.checkout-container {
+    background: rgba(0, 0, 0, 0.4); /* Semi-transparent dark */
+    backdrop-filter: blur(10px); /* Blur effect */
+    padding: 25px;
+    border-radius: 15px;
+    max-width: 600px;
+    margin: auto;
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.4); /* Soft glow */
+    border: 1px solid rgba(255, 255, 255, 0.2); /* Subtle border */
+}
+
+/* Glassy Input Fields */
+.form-control {
+    background: rgba(255, 255, 255, 0.1); /* Frosted glass effect */
+    backdrop-filter: blur(5px);
+    color: #ffffff;
+    border: 1px solid rgba(0, 255, 255, 0.7);
+    padding: 12px;
+    font-size: 16px;
+    border-radius: 8px;
+    transition: all 0.3s ease-in-out;
+	color: silver; /* Silver text */
+    font-weight: bold;
+}
+
+/* Input Hover Effect */
+.form-control:hover, .form-control:focus {
+    background: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 0 8px rgba(0, 255, 255, 0.6);
+}
+
+/* Placeholder Styling */
+.form-control::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+/* Labels for Readability */
+label {
+    font-size: 16px;
+    font-weight: bold;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+/* Improved Button Styling */
+.btn-primary {
+    background: rgba(0, 255, 255, 0.7);
+    color: black;
+    font-weight: bold;
+    padding: 12px 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.7);
+    transition: all 0.3s ease-in-out;
+}
+
+.btn-primary:hover {
+    background: rgba(0, 255, 255, 1);
+    box-shadow: 0 0 20px rgba(0, 255, 255, 1);
+}
+
+/* Darker Background Overlay for Better Contrast */
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(5px);
+    z-index: -1;
+}
+
+ /* Azure navbar */
+ .navbar-custom {
+    background-color: #F0FFFF;
+    padding: 10px 20px;
+    }    
+
+/* Logo */
+ .navbar-brand img {
+    height: 45px;
+    max-width: 265px;
+    }
+
+
+	
+</style>

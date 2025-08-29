@@ -1,0 +1,142 @@
+﻿@inherits LayoutComponentBase
+
+<!-- Navbar (Dark Glassy Background) -->
+<nav class="navbar navbar-expand-lg navbar-light navbar-custom">
+    <div class="container-fluid d-flex justify-content-between align-items-center">
+        <!-- Left Section: Logo -->
+        <a class="navbar-brand" href="/admin">
+            <img src="/images/logo-removebg-preview.png" alt="Laekning Logo">
+			<span class="silver-text">Administration</span>
+        </a>
+		
+		<div class="col-2 text-right">
+                <a class="btn btn-sm btn-primary" href="/account/logout">
+                    Log Out
+                </a>
+        </div>
+        
+    </div>
+</nav>
+
+<div class="container-fluid">
+    <div class="row p-2">
+        <div class="col-3">
+            <div class="d-grid gap-1">
+                <NavLink class="btn nav-btn"
+					href="/admin/products"
+					ActiveClass="nav-btn-active"
+					Match="NavLinkMatch.Prefix">
+						Products
+				</NavLink>
+				<NavLink class="btn nav-btn"
+					href="/admin/orders"
+					ActiveClass="nav-btn-active"
+					Match="NavLinkMatch.Prefix">
+						Orders
+				</NavLink>
+
+            </div>
+        </div>
+        <div class="col">
+            @Body
+        </div>
+    </div>
+</div>
+
+<style>
+
+
+	.btn-outline-primary {
+		background: rgba(0, 0, 0, 0.6);
+		border-color: rgba(0, 255, 255, 0.8);
+		box-shadow: 0 0 15px rgba(0, 255, 255, 1);
+		color: black;
+	}
+
+	.btn-primary {
+	
+		background: rgba(0, 255, 255, 0.8);
+		border-color: rgba(0, 255, 255, 0.8);
+		box-shadow: 0 0 15px rgba(0, 255, 255, 1);
+	}
+	
+	.btn-primary:hover {
+		background: rgba(0, 255, 255, 0.8);
+		box-shadow: 0 0 25px rgba(0, 255, 255, 1);
+		color: black;
+	}
+
+	
+		
+		
+        /* Dark Glassy navbar */
+        .navbar-custom {
+             background: rgba(0, 0, 0, 0.6);
+        border-radius: 10px;
+        padding: 15px;
+        text-align: center;
+        color: white;
+        backdrop-filter: blur(8px);
+        
+        }
+
+        /* Logo */
+        .navbar-brand img {
+            height: 45px;
+            max-width: 265px;
+        }
+
+       
+
+        /* Background image */
+		body {
+        background-image: url('/images/molecular-illustration.jpg'); 
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+		}
+		
+		
+		.silver-text {
+			font-family: "Copperplate Gothic Bold", "Gloock", serif; /* Fallback to Gloock if Copperplate is unavailable */
+			font-weight: bold;
+			font-style: italic;
+			background: linear-gradient(135deg, #d9d9d9, #ffffff, #a6a6a6, #e0e0e0);
+			-webkit-background-clip: text;
+			-webkit-text-fill-color: transparent;
+			text-shadow: 2px 2px 5px rgba(255, 255, 255, 0.6),
+					-2px -2px 5px rgba(100, 100, 100, 0.3);
+			letter-spacing: 2px; /* Gives that wide, bold look */
+			text-transform: uppercase; /* Makes it all caps like Copperplate */
+		}
+		
+		
+		
+		/* Custom navigation button */
+		.nav-btn {
+			background: rgba(0, 0, 0, 0.6); /* same as navbar */
+			border: 1px solid rgba(0, 255, 255, 0.6);
+			color: white;
+			font-weight: bold;
+			backdrop-filter: blur(4px);
+			text-shadow: 2px 2px 5px rgba(255, 255, 255, 0.5);
+			transition: all 0.3s ease;
+		}
+
+		/* Active button - Cyan highlight */
+		.nav-btn-active {
+			background: rgba(0, 255, 255, 0.85);
+			color: black !important;
+			box-shadow: 0 0 20px rgba(0, 255, 255, 1);
+			border: 1px solid rgba(0, 255, 255, 1);
+		}
+
+		/* Optional hover state */
+		.nav-btn:hover {
+			box-shadow: 0 0 15px rgba(0, 255, 255, 0.8);
+		}
+
+		
+
+    </style>
+

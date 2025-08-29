@@ -1,0 +1,109 @@
+﻿@model ProductsListViewModel
+
+@if (string.IsNullOrEmpty(Model.CurrentCategory)) {
+    <!-- Fullscreen Background Image on Homepage -->
+    <div class="homepage-banner">
+        <img src="/images/molecular-illustration.jpg" alt="Medicinal Drugs">
+    </div>
+
+    <style>
+        .homepage-banner {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh; /* Full viewport height */
+            overflow: hidden;
+            z-index: -1; /* Moves background behind other elements */
+        }
+
+        .homepage-banner img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Ensures the image covers the entire screen */
+        }
+    </style>
+} 
+else {
+    <div class="category-page">
+    <!-- Flexbox container for product display -->
+    <div class="products-container">
+        @foreach (var p in Model.Products ?? Enumerable.Empty<Product>()) {
+            <partial name="ProductSummary" model="p" />
+        }
+    </div>
+
+    <!-- Pagination Controls -->
+    <div page-model="@Model.PagingInfo" page-action="Index" 
+         page-classes-enabled="true" page-class="btn-custom" 
+         page-class-normal="btn-outline-dark"
+         page-class-selected="btn-primary"
+         page-url-category="@Model.CurrentCategory!" 
+         class="btn-group pull-right m-1">
+    </div>
+</div>
+
+<style>
+    /* Ensure background styling */
+    body {
+        background-image: url('/images/molecular-illustration.jpg'); /* Ensure correct path */
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+    }
+
+    /* Grid/Flexbox for products */
+    .products-container {
+        display: flex; /* Arrange items side by side */
+        flex-wrap: wrap; /* Allow wrapping to next row */
+        gap: 20px; /* Space between products */
+        justify-content: center; /* Center items horizontally */
+        padding: 20px;
+    }
+
+    /* Ensure product cards are consistently sized */
+    .product-card {
+        background: rgba(0, 0, 0, 0.6);
+        border-radius: 10px;
+        padding: 15px;
+        text-align: center;
+        color: white;
+        box-shadow: 0 4px 10px rgba(0, 255, 255, 0.3);
+        backdrop-filter: blur(8px);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        max-width: 250px; /* Ensures proper size */
+        flex: 1 1 250px; /* Responsive sizing */
+    }
+	
+	/* Centering the pagination button at the bottom */
+.btn-group {
+    position: absolute;
+    bottom: 20px; /* Distance from the bottom */
+    left: 50%;
+    transform: translateX(-50%); /* Center horizontally */
+    z-index: 10; /* Ensure it stays above the background */
+}
+
+/* Optional: Styling for pagination buttons */
+.btn-custom {
+    background: cyan; /* Neon cyan */
+    border-radius: 8px;
+    padding: 10px 15px;
+    font-weight: bold;
+    transition: background 0.3s ease, box-shadow 0.3s ease;
+	
+}
+
+.btn-custom:hover {
+    background: rgba(0, 255, 255, 1); /* Brighter on hover */
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.8);
+}
+
+
+
+</style>
+
+   
+
+
+}

@@ -1,0 +1,91 @@
+﻿@model Product
+
+<style>
+    /* Each product card */
+.product-card {
+    background: rgba(0, 0, 0, 0.6);
+    border-radius: 10px;
+    padding: 20px;
+    color: white;
+    width: 280px;
+    min-height: 420px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* pushes content to top & bottom */
+    box-shadow: 0 4px 10px rgba(0, 255, 255, 0.3);
+    backdrop-filter: blur(8px);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    text-align: center;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 15px rgba(0, 255, 255, 0.6);
+}
+
+.product-card img {
+         width: 100%;
+        height: 180px;
+        object-fit: contain;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        background: white;
+        padding: 5px;
+
+}
+
+.product-title {
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.price-badge {
+    background: cyan;
+    color: black;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-weight: bold;
+    font-size: 1em;
+    display: inline-block;
+    margin-bottom: 10px;
+}
+
+.product-desc {
+    font-size: 0.9em;
+    margin-bottom: 20px; /* Space between desc and button */
+    flex-grow: 1; /* Pushes button to bottom */
+}
+
+.add-to-cart {
+    background: cyan;
+    border: none;
+    color: black;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.3s ease;
+}
+
+.add-to-cart:hover {
+    background: #00a3a3;
+}
+
+</style>
+
+<div class="product-card">
+    <img src="~/images/@Model.Image" alt="@Model.Name" />
+
+    <h4 class="product-title">@Model.Name</h4>
+    <span class="price-badge">@Model.Price.ToString("c")</span>
+
+    <p class="product-desc">@Model.Description</p>
+
+    <form id="@Model.ProductID" asp-page="/Cart" method="post">
+        <input type="hidden" asp-for="ProductID" />
+        <input type="hidden" name="returnUrl" value="@ViewContext.HttpContext.Request.PathAndQuery()" />
+        <button type="submit" class="add-to-cart">Add To Cart</button>
+    </form>
+</div>

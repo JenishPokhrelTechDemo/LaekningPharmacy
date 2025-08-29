@@ -1,0 +1,136 @@
+@page
+@model Laekning.Pages.SearchResultsModel
+@{
+    ViewData["Title"] = "Search Results";
+}
+
+@if (string.IsNullOrWhiteSpace(Model.ExtractedInscription))
+{
+    <div class="alert alert-info mt-4">Please enter a search term.</div>
+}
+else if (Model.ProductsList == null || !Model.ProductsList.Any())
+{
+    <div class="alert alert-warning mt-4">
+        No products matched your search term: <strong>@Model.ExtractedInscription</strong>
+    </div>
+}
+else
+{
+    <div class="category-page">
+        <h2 class="custom-header">Search Results for the uploaded prescription</h2>
+        <div class="products-container">
+            @foreach (var product in Model.ProductsList)
+            {
+                var imageSrc = string.IsNullOrEmpty(product.Image) ? "/images/placeholder.png" : $"/images/{product.Image}";
+
+                <div class="product-card">
+                    <img src="@imageSrc" alt="@product.Name" class="img-fluid mb-2" style="height: 200px; object-fit: contain;" />
+                    <h5 class="text-info">@product.Name</h5>
+                    <p class="text-white font-weight-bold">$@product.Price</p>
+                    <p class="text-light small">@product.Description</p>
+					
+					
+					<!-- Add to Cart Form -->
+					<div class="button-container">
+						<form asp-page="/Cart" method="post">
+							<input type="hidden" name="productId" value="@product.ProductID" />
+							<input type="hidden" name="returnUrl" value="@ViewContext.HttpContext.Request.PathAndQuery()" />
+							<button type="submit" class="add-to-cart">Add To Cart</button>
+						</form>
+					</div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <style>
+        body {
+            background-image: url('/images/molecular-illustration.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+
+        .products-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .product-card {
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            color: white;
+            box-shadow: 0 4px 10px rgba(0, 255, 255, 0.3);
+            backdrop-filter: blur(8px);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            max-width: 250px;
+            flex: 1 1 250px;
+        }
+
+        .product-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 16px rgba(0, 255, 255, 0.5);
+        }
+		
+		.add-to-cart {
+    background: cyan;
+    border: none;
+    color: black;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.3s ease;
+	}
+
+	.add-to-cart:hover {
+		background: #00a3a3;
+	}
+	
+	.button-container {
+    display: flex;
+    justify-content: center; /* centers horizontally */
+    margin-top: 20px; /* spacing above button */
+	}.add-to-cart {
+    background: cyan;
+    border: none;
+    color: black;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.3s ease;
+	}
+
+	.add-to-cart:hover {
+		background: #00a3a3;
+	}
+	
+	.button-container {
+    display: flex;
+    justify-content: center; /* centers horizontally */
+    margin-top: 20px; /* spacing above button */
+	}
+	
+	.custom-header {
+        text-align: center;
+        font-size: 1.75rem;
+        margin-bottom: 1rem;
+        padding: 0.75rem;
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 12px;
+        box-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+        color: #000;
+    }
+    </style>
+	
+	
+}
+
+
+
