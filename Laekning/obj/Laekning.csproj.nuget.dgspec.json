@@ -103,11 +103,11 @@
             },
             "Microsoft.Extensions.Http": {
               "target": "Package",
-              "version": "[9.0.7, )"
+              "version": "[8.0.0, )"
             },
             "System.Text.Json": {
               "target": "Package",
-              "version": "[9.0.7, )"
+              "version": "[8.0.0, )"
             }
           },
           "imports": [
