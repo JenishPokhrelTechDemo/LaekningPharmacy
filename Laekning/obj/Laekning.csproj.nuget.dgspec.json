@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "F:\\Beginning ASPNET\\LaekningSln\\Laekning\\Laekning.csproj": {}
+    "F:\\Beginning ASPNET\\LaekningPharmacy\\Laekning\\Laekning.csproj": {}
   },
   "projects": {
-    "F:\\Beginning ASPNET\\LaekningSln\\Laekning\\Laekning.csproj": {
+    "F:\\Beginning ASPNET\\LaekningPharmacy\\Laekning\\Laekning.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "F:\\Beginning ASPNET\\LaekningSln\\Laekning\\Laekning.csproj",
+        "projectUniqueName": "F:\\Beginning ASPNET\\LaekningPharmacy\\Laekning\\Laekning.csproj",
         "projectName": "Laekning",
-        "projectPath": "F:\\Beginning ASPNET\\LaekningSln\\Laekning\\Laekning.csproj",
+        "projectPath": "F:\\Beginning ASPNET\\LaekningPharmacy\\Laekning\\Laekning.csproj",
         "packagesPath": "C:\\Users\\Dell\\.nuget\\packages\\",
-        "outputPath": "F:\\Beginning ASPNET\\LaekningSln\\Laekning\\obj\\",
+        "outputPath": "F:\\Beginning ASPNET\\LaekningPharmacy\\Laekning\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\Dell\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -86,6 +86,10 @@
             "Microsoft.Bot.Builder.Integration.AspNet.Core": {
               "target": "Package",
               "version": "[4.23.0, )"
+            },
+            "Microsoft.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[9.0.8, )"
             },
             "Microsoft.EntityFrameworkCore.Design": {
               "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
