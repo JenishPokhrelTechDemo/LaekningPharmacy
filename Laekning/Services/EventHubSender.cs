@@ -1,7 +1,9 @@
-/*using System.Text;
+using System.Text;
 using System.Text.Json;
 using Azure.Messaging.EventHubs;
 using Azure.Messaging.EventHubs.Producer;
+using Azure.Identity;
+using Azure.Security.KeyVault.Secrets;
 
 namespace Laekning.Services
 {
@@ -11,8 +13,14 @@ namespace Laekning.Services
 
         public EventHubSender(IConfiguration config)
         {
-            var connectionString = "";
-            var hubName = "" ;
+			string vaultUri = config["AzureKeyVault:KeyVaultUrl"];
+			var client = new SecretClient(new Uri(vaultUri), new DefaultAzureCredential());
+
+			KeyVaultSecret secretEventHubConnectionString = client.GetSecret("EventHubConnectionString");
+			KeyVaultSecret secretEventHubName =  client.GetSecret("EventHubName");
+			
+            var connectionString = secretEventHubConnectionString.Value;
+            var hubName = secretEventHubName.Value;
             _producerClient = new EventHubProducerClient(connectionString, hubName);
         }
 
@@ -25,4 +33,3 @@ namespace Laekning.Services
         }
     }
 }
-*/

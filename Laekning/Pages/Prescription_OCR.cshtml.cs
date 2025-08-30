@@ -28,13 +28,13 @@ namespace Laekning.Pages
 		private string Endpoint; 
 		private string ApiKey;
 		
-		//private readonly EventHubSender _eventHub;
+		private readonly EventHubSender _eventHub;
 
-        public PrescriptionOCRModel(IWebHostEnvironment env, ILogger<PrescriptionOCRModel> logger /* EventHubSender eventHub*/, IConfiguration config)
+        public PrescriptionOCRModel(IWebHostEnvironment env, ILogger<PrescriptionOCRModel> logger, EventHubSender eventHub, IConfiguration config)
         {
             _env = env;
             _logger = logger;
-		//	_eventHub = eventHub;
+			_eventHub = eventHub;
 			_config = config;
 		
         }
@@ -94,7 +94,7 @@ namespace Laekning.Pages
                 UploadResult = $"Uploaded: {UploadedFileName}";
                 _logger.LogInformation("File uploaded: {File}", UploadedFileName);
 				
-				/* Send "PrescriptionUploaded" event
+				//Send "PrescriptionUploaded" event
                 var uploadEvent = new
                 {
                     EventType = "PrescriptionUploaded",
@@ -103,7 +103,7 @@ namespace Laekning.Pages
                     UploadedBy = User.Identity?.Name ?? "Anonymous",
                     Timestamp = DateTime.UtcNow
                 };
-                await _eventHub.SendAsync(uploadEvent);*/
+                await _eventHub.SendAsync(uploadEvent);
             }
         }
 
@@ -154,7 +154,7 @@ namespace Laekning.Pages
                             UploadResult += $" | Patient: {ExtractedPatientDetails}";
 						
 						
-						/* Send "PrescriptionAnalyzed" event
+						//Send "PrescriptionAnalyzed" event
 						var analyzedEvent = new
 						{
 							EventType = "PrescriptionAnalyzed",
@@ -165,7 +165,7 @@ namespace Laekning.Pages
 							ProcessedBy = "DocumentIntelligence-OCR"
 						};
 						
-						await _eventHub.SendAsync(analyzedEvent);*/
+						await _eventHub.SendAsync(analyzedEvent);
 
 
                         //  FIX: Redirect with correct query string name

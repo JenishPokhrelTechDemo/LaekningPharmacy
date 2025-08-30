@@ -15,13 +15,13 @@ namespace Laekning.Pages
     {
         private readonly StoreDbContext _dbContext;
         private readonly OcrGptSearchHelper _gptHelper;
-		//private readonly EventHubSender _eventHub;
+		private readonly EventHubSender _eventHub;
 
-        public SearchResultsModel(StoreDbContext dbContext, OcrGptSearchHelper gptHelper /*EventHubSender eventHub*/)
+        public SearchResultsModel(StoreDbContext dbContext, OcrGptSearchHelper gptHelper, EventHubSender eventHub)
         {
             _dbContext = dbContext;
             _gptHelper = gptHelper;
-			//_eventHub = eventHub;
+			_eventHub = eventHub;
 			
         }
 
@@ -57,7 +57,7 @@ namespace Laekning.Pages
                 .Where(p => correctedMatches.Contains(p.Name))
                 .ToListAsync();
 			
-			/*  Send "ProductsIdentified" event
+			 // Send "ProductsIdentified" event
             var productsEvent = new
             {
                 EventType = "ProductsIdentified",
@@ -66,7 +66,7 @@ namespace Laekning.Pages
                 Timestamp = DateTime.UtcNow,
                 ProcessedBy = "OcrGptSearchHelper"
             };
-            await _eventHub.SendAsync(productsEvent);*/
+            await _eventHub.SendAsync(productsEvent);
 
 
             return Page();

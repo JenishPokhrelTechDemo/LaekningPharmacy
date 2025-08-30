@@ -8,12 +8,12 @@ namespace Laekning.Controllers{
 		
 		public IOrderRepository repository;
 		private Cart cart;
-		//private readonly EventHubSender eventHubSender;
+		private readonly EventHubSender eventHubSender;
 		
-		public OrderController(IOrderRepository reposervice, Cart cartService /*EventHubSender hubSender*/){
+		public OrderController(IOrderRepository reposervice, Cart cartService, EventHubSender hubSender){
 			repository = reposervice;
 			cart = cartService;
-			//eventHubSender = hubSender;
+			eventHubSender = hubSender;
 			
 		}
 		
@@ -28,7 +28,7 @@ namespace Laekning.Controllers{
 				order.Lines = cart.Lines.ToArray();
 				repository.SaveOrder(order);
 				
-				 /* Fire Event: Order Placed
+				 //Fire Event: Order Placed
                 var orderEvent = new {
                     EventType = "OrderPlaced",
                     OrderId = order.OrderID,
@@ -39,7 +39,7 @@ namespace Laekning.Controllers{
                 };
 
                 object payload = JsonSerializer.Serialize(orderEvent);
-                await eventHubSender.SendAsync(payload);*/
+                await eventHubSender.SendAsync(payload);
 				
 				cart.Clear();
 				return RedirectToPage("/Completed", 

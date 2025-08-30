@@ -40,7 +40,7 @@ builder.Services.AddScoped<OcrGptSearchHelper>();
 builder.Services.AddRazorPages();
 builder.Services.AddDistributedMemoryCache();
 
-//builder.Services.AddSingleton<EventHubSender>();
+builder.Services.AddSingleton<EventHubSender>();
 
 
 // Configure Session options

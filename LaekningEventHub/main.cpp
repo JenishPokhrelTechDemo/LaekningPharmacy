@@ -19,7 +19,7 @@ int main()
 {
     std::cout << "Starting Program!" << std::endl;
 
-    auto const keyVaultUrl = std::getenv("AZURE_KEYVAULT_URL");
+    auto const keyVaultUrl = "https://laekningtestkeyvault.vault.azure.net/";
 
         // create a credential
     auto credential = std::make_shared<Azure::Identity::ChainedTokenCredential>(

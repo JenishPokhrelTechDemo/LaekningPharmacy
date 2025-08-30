@@ -3,6 +3,8 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text;
 using Laekning.Models;
+using Azure.Identity;
+using Azure.Security.KeyVault.Secrets;
 
 namespace Laekning.Services
 {
@@ -19,7 +21,13 @@ namespace Laekning.Services
 
         public async Task<List<string>> GetRecommendedProductsAsync(List<string> purchasedProducts, List<string> allDbProductNames)
         {
-            var functionUrl = _config["AzureFunctions:RecommendUrl"];  // set in appsettings.json
+			
+			string vaultUri = _config["AzureKeyVault:KeyVaultUrl"];
+			var client = new SecretClient(new Uri(vaultUri), new DefaultAzureCredential());
+
+			KeyVaultSecret secretAzureFunctionsRecommendrl = client.GetSecret("AzureFunctionsRecommendUrl");
+            
+			var functionUrl = secretAzureFunctionsRecommendrl.Value;  // Retrived from Azure Key Vault
             var functionKey = "";  // optional, depends on auth level
 
             var payload = new
