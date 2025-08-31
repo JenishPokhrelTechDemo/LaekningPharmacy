@@ -26,7 +26,12 @@ stages:
         workingDirectory: 'LaekningEventHub'
         cmakeArgs: '--build build --config Release'
 
-
+    - task: PublishBuildArtifacts@1
+      displayName: Publish Executable
+      inputs:
+        PathtoPublish: 'build/Release'
+        ArtifactName: 'drop'
+        publishLocation: 'Container'
 
 
 
