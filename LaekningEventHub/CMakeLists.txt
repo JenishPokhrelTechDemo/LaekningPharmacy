@@ -1,7 +1,7 @@
-cmake_minimum_required(VERSION 4.1.0)
+cmake_minimum_required(VERSION 3.31.6)
 
 # Path to vcpkg
-set(CMAKE_TOOLCHAIN_FILE "G:/vcpkg/scripts/buildsystems/vcpkg.cmake")
+set(CMAKE_TOOLCHAIN_FILE "C:/vcpkg/scripts/buildsystems/vcpkg.cmake")
 
 project(laekning_eventhub VERSION 0.1.0 LANGUAGES C CXX)
 
