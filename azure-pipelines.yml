@@ -9,7 +9,7 @@ stages:
   jobs:
   - job: Package_FunctionApp
     pool:
-      vmImage: windows-latest
+      vmImage: ubuntu-latest
 
     steps:
     - task: UsePythonVersion@0
@@ -20,7 +20,7 @@ stages:
 
     - script: |
         python -m venv .venv
-        call .venv\Scripts\activate
+        source .venv/bin/activate
         pip install -r requirements.txt
       workingDirectory: 'LaekningGenAIRecommendationModule'
       displayName: "Install Python Dependencies"
