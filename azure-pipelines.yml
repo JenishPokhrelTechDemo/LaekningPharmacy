@@ -1,6 +1,6 @@
 trigger:
 - '*'
-
+stages:
 # -------------------------------
 # Stage 4: Build C++ EventHub Project
 # -------------------------------
