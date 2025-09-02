@@ -46,7 +46,7 @@ stages:
 # Stage 5: Deploy Python Function App
 # -------------------------------        
 - stage: Deploy_FunctionApp
-  displayName: "Deploy Python Function App"
+  displayName: "Deploy Python Function App "
   dependsOn: Package_FunctionApp
   jobs:
   - deployment: Deploy_FunctionApp
@@ -70,3 +70,8 @@ stages:
               isFlexConsumption: true
               package: '$(Pipeline.Workspace)/drop-functionapp/functionapp.zip'
               runtimeStack: PYTHON|3.11
+              
+              
+              
+              
+              
