@@ -3,108 +3,10 @@ trigger:
   
 stages:
 # -------------------------------
-# Stage 1: Build ASP.NET Core App
-# -------------------------------
-- stage: Build_ASPNET
-  displayName: "Build ASP.NET Core App"
-  jobs:
-  - job: Build_ASPNET
-    pool:
-      vmImage: windows-latest
-
-    steps:
-    - task: UseDotNet@2
-      displayName: 'Use .NET SDK 8.x'
-      inputs:
-        packageType: sdk
-        version: '8.x'
-    
-    - script: 'echo "$(Build.DefinitionName), $(Build.BuildId), $(Build.BuildNumber)" > buildinfo.txt'
-      displayName: 'Write build info'
-      workingDirectory: Laekning/wwwroot
-
-    - task: DotNetCoreCLI@2
-      displayName: 'Restore project dependencies'
-      inputs:
-        command: 'restore'
-        projects: 'Laekning/Laekning.csproj'
-        arguments: '--prerelease'
-    
-    - task: DotNetCoreCLI@2
-      displayName: 'Build the project - Release'
-      inputs:
-        command: 'build'
-        arguments: '--no-restore --configuration Release'
-        projects: 'Laekning/Laekning.csproj'
-
-# -------------------------------
-# Stage 2: Run Unit Tests
-# -------------------------------
-- stage: Test_ASPNET
-  variables:
-    buildConfiguration: 'Release'
-  displayName: "Run ASP.NET Unit Tests"
-  dependsOn: Build_ASPNET
-  jobs:
-  - job: Test_ASPNET
-    pool:
-      vmImage: windows-latest
-
-    steps:
-    - task: UseDotNet@2
-      displayName: 'Use .NET SDK 8.x'
-      inputs:
-        packageType: sdk
-        version: '8.x'
-        
-    - task: DotNetCoreCLI@2
-      displayName: 'Run unit tests - $(buildConfiguration)'
-      inputs:
-        command: 'test'
-        arguments: '--configuration $(buildConfiguration)'
-        publishTestResults: true
-        projects: 'Laekning.Tests.csproj' 
-        
-        
-# -------------------------------
-# Stage 3: Publish ASP.NET Core App
-# -------------------------------
-- stage: Publish_ASPNET
-  displayName: "Publish ASP.NET Core App"
-  dependsOn: Test_ASPNET
-  jobs:
-  - job: Publish_ASPNET
-    pool:
-      vmImage: windows-latest
-    
-    steps:
-    - task: UseDotNet@2
-      displayName: 'Use .NET SDK 8.x'
-      inputs:
-        packageType: sdk
-        version: '8.x'
-        
-    - task: DotNetCoreCLI@2
-      displayName: 'Publish the project - Release'
-      inputs:
-        command: 'publish'
-        projects: 'Laekning/Laekning.csproj'
-        publishWebProjects: false
-        arguments: '--configuration Release --output $(Build.ArtifactStagingDirectory)/Release'
-        zipAfterPublish: true
-
-    - task: PublishBuildArtifacts@1
-      displayName: 'Publish Artifact: drop'
-      condition: succeeded()
-
-
-
-
-# -------------------------------
 # Stage 4: Package Python Function App
 # -------------------------------
 - stage: Package_FunctionApp
-  dependsOn: Publish_ASPNET
+#  dependsOn: Publish_ASPNET
   displayName: "Package Python Function App"
   jobs:
   - job: Package_FunctionApp
@@ -137,7 +39,7 @@ stages:
     - task: PublishBuildArtifacts@1
       displayName: "Publish Function App Package"
       inputs:
-        pathToPublish: '$(Build.ArtifactStagingDirectory)/functionapp.zip'
+        pathToPublish: '$(Build.ArtifactStagingDirectory)'
         artifactName: 'drop-functionapp'
 
 # -------------------------------
@@ -168,31 +70,3 @@ stages:
               isFlexConsumption: true
               package: '$(Pipeline.Workspace)/drop-functionapp/functionapp.zip'
               runtimeStack: PYTHON|3.11
-
-# -------------------------------
-# Stage 6: Deploy ASP.NET Core App
-# -------------------------------
-- stage: Deploy_ASPNET
-  displayName: "Deploy the web application"
-  dependsOn: Deploy_FunctionApp
-  jobs:
-  - deployment: Deploy
-    pool:
-      vmImage: windows-latest
-    environment: dev
-    variables:
-    - group: Release
-    strategy:
-      runOnce:
-        deploy:
-          steps:
-          - download: current
-            artifact: drop
-          - task: AzureWebApp@1
-            displayName: 'Azure App Service Deploy: website'
-            inputs:
-              azureSubscription: 'Laekning Service Connection'
-              appName: '$(WebAppName)'
-              package: '$(Pipeline.Workspace)/drop/$(buildConfiguration)/*.zip'
-
-
