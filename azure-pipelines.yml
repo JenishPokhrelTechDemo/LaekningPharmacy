@@ -166,9 +166,8 @@ stages:
               appType: functionAppLinux
               appName: '$(GenAIAppName)'
               isFlexConsumption: true
-              package: '$(Pipeline.Workspace)/drop/$(buildConfiguration)/functionapp.zip'
+              package: '$(Pipeline.Workspace)/drop-functionapp/functionapp.zip'
               runtimeStack: PYTHON|3.11
-              startUpCommand: 'func azure functionapp publish $(functionAppName) --no-bundler'
 
 # -------------------------------
 # Stage 6: Deploy ASP.NET Core App
