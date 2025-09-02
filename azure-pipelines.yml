@@ -70,6 +70,7 @@ stages:
               isFlexConsumption: true
               package: '$(Pipeline.Workspace)/drop-functionapp/functionapp.zip'
               runtimeStack: PYTHON|3.11
+              appSettings: ''
               
               
               
