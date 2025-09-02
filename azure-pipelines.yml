@@ -61,8 +61,8 @@ stages:
           steps:
           - download: current
             artifact: drop-functionapp     
-          - task: AzureFunctionApp@1
-            displayName: 'Azure Function Deploy: leaderboard'
+          - task: AzureFunctionApp@2
+            displayName: 'Azure Function Deploy: Gen Ai Module'
             inputs:
               azureSubscription: 'Laekning Service Connection'
               appType: functionAppLinux
@@ -70,7 +70,6 @@ stages:
               isFlexConsumption: true
               package: '$(Pipeline.Workspace)/drop-functionapp/functionapp.zip'
               runtimeStack: PYTHON|3.11
-              appSettings: ''
               
               
               
