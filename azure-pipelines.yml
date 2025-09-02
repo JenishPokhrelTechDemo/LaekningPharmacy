@@ -98,12 +98,84 @@ stages:
       condition: succeeded()
 
 
+
+
 # -------------------------------
-# Stage 4: Deploy ASP.NET Core App
+# Stage 4: Package Python Function App
+# -------------------------------
+- stage: Package_FunctionApp
+  dependsOn: Publish_ASPNET
+  displayName: "Package Python Function App"
+  jobs:
+  - job: Package_FunctionApp
+    pool:
+      vmImage: ubuntu-latest
+
+    steps:
+    - task: UsePythonVersion@0
+      displayName: "Set Python Version"
+      inputs:
+        versionSpec: '3.11.9'
+        addToPath: true
+
+    - script: |
+        python -m venv .venv
+        source .venv/bin/activate
+        pip install -r requirements.txt
+      workingDirectory: 'LaekningGenAIRecommendationModule'
+      displayName: "Install Python Dependencies"
+
+    - task: ArchiveFiles@2
+      displayName: "Package Function App"
+      inputs:
+        rootFolderOrFile: 'LaekningGenAIRecommendationModule'
+        includeRootFolder: false
+        archiveType: zip
+        archiveFile: '$(Build.ArtifactStagingDirectory)/functionapp.zip'
+        replaceExistingArchive: true
+
+    - task: PublishBuildArtifacts@1
+      displayName: "Publish Function App Package"
+      inputs:
+        pathToPublish: '$(Build.ArtifactStagingDirectory)/functionapp.zip'
+        artifactName: 'drop-functionapp'
+
+# -------------------------------
+# Stage 5: Deploy Python Function App
+# -------------------------------        
+- stage: Deploy_FunctionApp
+  displayName: "Deploy Python Function App"
+  dependsOn: Package_FunctionApp
+  jobs:
+  - deployment: Deploy_FunctionApp
+    pool:
+      vmImage: ubuntu-latest
+    environment: spike
+    variables:
+    - group: Release
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - download: current
+            artifact: drop     
+          - task: AzureFunctionApp@1
+            displayName: 'Azure Function Deploy: leaderboard'
+            inputs:
+              azureSubscription: 'Laekning Service Connection'
+              appType: functionAppLinux
+              appName: '$(GenAIAppName)'
+              isFlexConsumption: true
+              package: '$(Pipeline.Workspace)/drop/$(buildConfiguration)/functionapp.zip'
+              runtimeStack: PYTHON|3.11
+              startUpCommand: 'func azure functionapp publish $(functionAppName) --no-bundler'
+
+# -------------------------------
+# Stage 6: Deploy ASP.NET Core App
 # -------------------------------
 - stage: Deploy_ASPNET
   displayName: "Deploy the web application"
-  dependsOn: Publish_ASPNET
+  dependsOn: Deploy_FunctionApp
   jobs:
   - deployment: Deploy
     pool:
@@ -123,6 +195,5 @@ stages:
               azureSubscription: 'Laekning Service Connection'
               appName: '$(WebAppName)'
               package: '$(Pipeline.Workspace)/drop/$(buildConfiguration)/*.zip'
-
 
 
