@@ -60,7 +60,7 @@ stages:
         deploy:
           steps:
           - download: current
-            artifact: drop     
+            artifact: drop-functionapp     
           - task: AzureFunctionApp@1
             displayName: 'Azure Function Deploy: leaderboard'
             inputs:
