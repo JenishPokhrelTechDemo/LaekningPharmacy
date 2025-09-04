@@ -1,10 +1,10 @@
 trigger:
-- '*'
-
+  branches:
+    include:
+    - '*'
+    
+    
 stages:
-# -------------------------------
-# Stage 1: Validate Python Function App
-# -------------------------------
 - stage: Validate_FunctionApp
   displayName: "Validate Python Function App"
   jobs:
@@ -17,18 +17,18 @@ stages:
       inputs:
         versionSpec: '3.11'
         addToPath: true
-
-    - script: |
-        pip install -r requirements.txt
-      workingDirectory: 'LaekningGenAIRecommendationModule'
+    - task: CmdLine@2
       displayName: "Validate requirements.txt"
-
-# -------------------------------
-# Stage 2: Package & Publish Artifact
-# -------------------------------
+      inputs:
+        script: |
+          pip install -r requirements.txt
+        workingDirectory: 'LaekningGenAIRecommendationModule'
+        
+        
 - stage: Package_FunctionApp
   displayName: "Package Python Function App"
-  dependsOn: Validate_FunctionApp
+  dependsOn:
+  - Validate_FunctionApp
   jobs:
   - job: Package
     pool:
@@ -39,18 +39,17 @@ stages:
       inputs:
         pathToPublish: 'LaekningGenAIRecommendationModule'
         artifactName: 'functionapp-src'
-
-# -------------------------------
-# Stage 3: Deploy Python Function App
-# -------------------------------
+        
+        
 - stage: Deploy_FunctionApp
   displayName: "Deploy Python Function App"
-  dependsOn: Package_FunctionApp
+  dependsOn:
+  - Package_FunctionApp
   jobs:
   - deployment: Deploy_FunctionApp
     pool:
       vmImage: ubuntu-latest
-    environment: 
+    environment:
       name: spike
     variables:
     - group: Release
@@ -58,11 +57,10 @@ stages:
       runOnce:
         deploy:
           steps:
-          # Download artifact
-          - download: current
-            artifact: functionapp-src
-
-          # Deploy using AzureFunctionApp@2, let Oryx handle build
+          - task: 30f35852-3f7e-4c0c-9a88-e127b4f97211@1
+            inputs:
+              alias: current
+              artifact: functionapp-src
           - task: AzureFunctionApp@2
             displayName: 'Azure Function Deploy: Gen AI Module'
             inputs:
@@ -71,5 +69,19 @@ stages:
               appName: '$(GenAIAppName)'
               runtimeStack: PYTHON|3.11
               package: '$(Pipeline.Workspace)/functionapp-src'
-              
-        
+          - task: AzureCLI@2
+            displayName: 'Install Azure Functions Extension'
+            inputs:
+              azureSubscription: 'Laekning Service Connection'
+              scriptType: bash
+              scriptLocation: inlineScript
+              inlineScript: |
+                az extension add -n azure-functions
+          - task: AzureCLI@2
+            displayName: 'Sync Azure Functions Triggers'
+            inputs:
+              azureSubscription: 'Laekning Service Connection'
+              scriptType: bash
+              scriptLocation: inlineScript
+              inlineScript: |
+                az functionapp sync-functions --name $(GenAIAppName) --resource-group LaekningTestResourceGroup
