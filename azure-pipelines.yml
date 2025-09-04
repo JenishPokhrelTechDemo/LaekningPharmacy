@@ -50,7 +50,10 @@ stages:
   - deployment: Deploy_FunctionApp
     pool:
       vmImage: ubuntu-latest
-    environment: spike
+    environment: 
+      name: spike
+    variables:
+    - group: Release
     strategy:
       runOnce:
         deploy:
