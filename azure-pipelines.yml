@@ -71,6 +71,16 @@ stages:
               appName: '$(GenAIAppName)'
               runtimeStack: PYTHON|3.11
               package: '$(Pipeline.Workspace)/functionapp-src'
+              
+          - task: AzureCLI@2
+            displayName: 'Install Azure Functions Extension'
+            inputs:
+              azureSubscription: 'Laekning Service Connection'
+              scriptType: bash
+              scriptLocation: inlineScript
+              inlineScript: |
+                az extension add --name azure-functions || az extension update --name azure-functions
+
 
           # Sync triggers to ensure functions are registered
           - task: AzureCLI@2
