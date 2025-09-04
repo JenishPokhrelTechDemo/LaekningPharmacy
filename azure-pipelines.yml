@@ -1,87 +1,127 @@
 trigger:
-  branches:
-    include:
-    - '*'
-    
-    
+- '*'
+  
 stages:
-- stage: Validate_FunctionApp
-  displayName: "Validate Python Function App"
+# -------------------------------
+# Stage 1: Build ASP.NET Core App
+# -------------------------------
+- stage: Build_ASPNET
+  displayName: "Build ASP.NET Core App"
   jobs:
-  - job: Validate_FunctionApp
+  - job: Build_ASPNET
     pool:
-      vmImage: ubuntu-latest
+      vmImage: windows-latest
+
     steps:
-    - task: UsePythonVersion@0
-      displayName: "Set Python Version"
+    - task: UseDotNet@2
+      displayName: 'Use .NET SDK 8.x'
       inputs:
-        versionSpec: '3.11'
-        addToPath: true
-    - task: CmdLine@2
-      displayName: "Validate requirements.txt"
+        packageType: sdk
+        version: '8.x'
+    
+    - script: 'echo "$(Build.DefinitionName), $(Build.BuildId), $(Build.BuildNumber)" > buildinfo.txt'
+      displayName: 'Write build info'
+      workingDirectory: Laekning/wwwroot
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Restore project dependencies'
       inputs:
-        script: |
-          pip install -r requirements.txt
-        workingDirectory: 'LaekningGenAIRecommendationModule'
+        command: 'restore'
+        projects: 'Laekning/Laekning.csproj'
+        arguments: '--prerelease'
+    
+    - task: DotNetCoreCLI@2
+      displayName: 'Build the project - Release'
+      inputs:
+        command: 'build'
+        arguments: '--no-restore --configuration Release'
+        projects: 'Laekning/Laekning.csproj'
+
+# -------------------------------
+# Stage 2: Run Unit Tests
+# -------------------------------
+- stage: Test_ASPNET
+  variables:
+    buildConfiguration: 'Release'
+  displayName: "Run ASP.NET Unit Tests"
+  dependsOn: Build_ASPNET
+  jobs:
+  - job: Test_ASPNET
+    pool:
+      vmImage: windows-latest
+
+    steps:
+    - task: UseDotNet@2
+      displayName: 'Use .NET SDK 8.x'
+      inputs:
+        packageType: sdk
+        version: '8.x'
+        
+    - task: DotNetCoreCLI@2
+      displayName: 'Run unit tests - $(buildConfiguration)'
+      inputs:
+        command: 'test'
+        arguments: '--configuration $(buildConfiguration)'
+        publishTestResults: true
+        projects: 'Laekning.Tests.csproj' 
         
         
-- stage: Package_FunctionApp
-  displayName: "Package Python Function App"
-  dependsOn:
-  - Validate_FunctionApp
+# -------------------------------
+# Stage 3: Publish ASP.NET Core App
+# -------------------------------
+- stage: Publish_ASPNET
+  displayName: "Publish ASP.NET Core App"
+  dependsOn: Test_ASPNET
   jobs:
-  - job: Package
+  - job: Publish_ASPNET
     pool:
-      vmImage: ubuntu-latest
+      vmImage: windows-latest
+    
     steps:
+    - task: UseDotNet@2
+      displayName: 'Use .NET SDK 8.x'
+      inputs:
+        packageType: sdk
+        version: '8.x'
+        
+    - task: DotNetCoreCLI@2
+      displayName: 'Publish the project - Release'
+      inputs:
+        command: 'publish'
+        projects: 'Laekning/Laekning.csproj'
+        publishWebProjects: false
+        arguments: '--configuration Release --output $(Build.ArtifactStagingDirectory)/Release'
+        zipAfterPublish: true
+
     - task: PublishBuildArtifacts@1
-      displayName: "Publish Function App Source"
-      inputs:
-        pathToPublish: 'LaekningGenAIRecommendationModule'
-        artifactName: 'functionapp-src'
-        
-        
-- stage: Deploy_FunctionApp
-  displayName: "Deploy Python Function App"
-  dependsOn:
-  - Package_FunctionApp
+      displayName: 'Publish Artifact: drop'
+      condition: succeeded()
+
+
+# -------------------------------
+# Stage 4: Deploy ASP.NET Core App
+# -------------------------------
+- stage: Deploy_ASPNET
+  displayName: "Deploy the web application"
+  dependsOn: Publish_ASPNET
   jobs:
-  - deployment: Deploy_FunctionApp
+  - deployment: Deploy
     pool:
-      vmImage: ubuntu-latest
-    environment:
-      name: spike
+      vmImage: windows-latest
+    environment: dev
     variables:
     - group: Release
     strategy:
       runOnce:
         deploy:
           steps:
-          - task: 30f35852-3f7e-4c0c-9a88-e127b4f97211@1
-            inputs:
-              alias: current
-              artifact: functionapp-src
-          - task: AzureFunctionApp@2
-            displayName: 'Azure Function Deploy: Gen AI Module'
+          - download: current
+            artifact: drop
+          - task: AzureWebApp@1
+            displayName: 'Azure App Service Deploy: website'
             inputs:
               azureSubscription: 'Laekning Service Connection'
-              appType: functionAppLinux
-              appName: '$(GenAIAppName)'
-              runtimeStack: PYTHON|3.11
-              package: '$(Pipeline.Workspace)/functionapp-src'
-          - task: AzureCLI@2
-            displayName: 'Install Azure Functions Extension'
-            inputs:
-              azureSubscription: 'Laekning Service Connection'
-              scriptType: bash
-              scriptLocation: inlineScript
-              inlineScript: |
-                az extension add -n functionapp
-          - task: AzureCLI@2
-            displayName: 'Sync Azure Functions Triggers'
-            inputs:
-              azureSubscription: 'Laekning Service Connection'
-              scriptType: bash
-              scriptLocation: inlineScript
-              inlineScript: |
-                az functionapp sync-functions --name $(GenAIAppName) --resource-group LaekningTestResourceGroup
+              appName: '$(WebAppName)'
+              package: '$(Pipeline.Workspace)/drop/$(buildConfiguration)/*.zip'
+
+
