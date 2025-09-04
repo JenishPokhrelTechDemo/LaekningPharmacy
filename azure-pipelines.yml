@@ -3,13 +3,12 @@ trigger:
   
 stages:
 # -------------------------------
-# Stage 4: Package Python Function App
+# Stage 4: Validate Python Function App
 # -------------------------------
-- stage: Package_FunctionApp
-#  dependsOn: Publish_ASPNET
-  displayName: "Package Python Function App"
+- stage: Validate_FunctionApp
+  displayName: "Validate Python Function App"
   jobs:
-  - job: Package_FunctionApp
+  - job: Validate_FunctionApp
     pool:
       vmImage: ubuntu-latest
 
@@ -17,35 +16,20 @@ stages:
     - task: UsePythonVersion@0
       displayName: "Set Python Version"
       inputs:
-        versionSpec: '3.11.9'
+        versionSpec: '3.11'
         addToPath: true
 
     - script: |
         pip install -r requirements.txt
       workingDirectory: 'LaekningGenAIRecommendationModule'
-      displayName: "Validate requirements"
-
-    - task: ArchiveFiles@2
-      displayName: "Package Function App"
-      inputs:
-        rootFolderOrFile: 'LaekningGenAIRecommendationModule'
-        includeRootFolder: false
-        archiveType: zip
-        archiveFile: '$(Build.ArtifactStagingDirectory)/functionapp.zip'
-        replaceExistingArchive: true
-
-    - task: PublishBuildArtifacts@1
-      displayName: "Publish Function App Package"
-      inputs:
-        pathToPublish: '$(Build.ArtifactStagingDirectory)'
-        artifactName: 'drop-functionapp'
+      displayName: "Validate requirements.txt"
 
 # -------------------------------
 # Stage 5: Deploy Python Function App
 # -------------------------------        
 - stage: Deploy_FunctionApp
-  displayName: "Deploy Python Function App "
-  dependsOn: Package_FunctionApp
+  displayName: "Deploy Python Function App"
+  dependsOn: Validate_FunctionApp
   jobs:
   - deployment: Deploy_FunctionApp
     pool:
@@ -57,19 +41,11 @@ stages:
       runOnce:
         deploy:
           steps:
-          - download: current
-            artifact: drop-functionapp     
           - task: AzureFunctionApp@2
-            displayName: 'Azure Function Deploy: Gen Ai Module'
+            displayName: 'Azure Function Deploy: Gen AI Module'
             inputs:
               azureSubscription: 'Laekning Service Connection'
               appType: functionAppLinux
               appName: '$(GenAIAppName)'
-              isFlexConsumption: true
-              package: '$(Pipeline.Workspace)/drop-functionapp/functionapp.zip'
               runtimeStack: PYTHON|3.11
-              
-              
-              
-              
-              
+              package: 'LaekningGenAIRecommendationModule'
