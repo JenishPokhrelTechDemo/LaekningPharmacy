@@ -76,7 +76,7 @@ stages:
               scriptType: bash
               scriptLocation: inlineScript
               inlineScript: |
-                az extension add -n azure-functions
+                az extension add -n functionapp
           - task: AzureCLI@2
             displayName: 'Sync Azure Functions Triggers'
             inputs:
