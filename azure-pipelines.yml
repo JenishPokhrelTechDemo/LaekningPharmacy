@@ -1,17 +1,16 @@
 trigger:
 - '*'
-  
+
 stages:
 # -------------------------------
-# Stage 4: Package Python Function App
+# Stage 1: Validate Python Function App
 # -------------------------------
-- stage: Package_FunctionApp
-  displayName: "Package Python Function App"
+- stage: Validate_FunctionApp
+  displayName: "Validate Python Function App"
   jobs:
-  - job: Package_FunctionApp
+  - job: Validate_FunctionApp
     pool:
       vmImage: ubuntu-latest
-
     steps:
     - task: UsePythonVersion@0
       displayName: "Set Python Version"
@@ -24,6 +23,17 @@ stages:
       workingDirectory: 'LaekningGenAIRecommendationModule'
       displayName: "Validate requirements.txt"
 
+# -------------------------------
+# Stage 2: Package & Publish Artifact
+# -------------------------------
+- stage: Package_FunctionApp
+  displayName: "Package Python Function App"
+  dependsOn: Validate_FunctionApp
+  jobs:
+  - job: Package
+    pool:
+      vmImage: ubuntu-latest
+    steps:
     - task: PublishBuildArtifacts@1
       displayName: "Publish Function App Source"
       inputs:
@@ -31,8 +41,8 @@ stages:
         artifactName: 'functionapp-src'
 
 # -------------------------------
-# Stage 5: Deploy Python Function App
-# -------------------------------        
+# Stage 3: Deploy Python Function App
+# -------------------------------
 - stage: Deploy_FunctionApp
   displayName: "Deploy Python Function App"
   dependsOn: Package_FunctionApp
@@ -41,15 +51,15 @@ stages:
     pool:
       vmImage: ubuntu-latest
     environment: spike
-    variables:
-    - group: Release
     strategy:
       runOnce:
         deploy:
           steps:
+          # Download artifact
           - download: current
             artifact: functionapp-src
 
+          # Deploy using AzureFunctionApp@2, let Oryx handle build
           - task: AzureFunctionApp@2
             displayName: 'Azure Function Deploy: Gen AI Module'
             inputs:
@@ -57,5 +67,14 @@ stages:
               appType: functionAppLinux
               appName: '$(GenAIAppName)'
               runtimeStack: PYTHON|3.11
-              isFlexConsumption: true
               package: '$(Pipeline.Workspace)/functionapp-src'
+
+          # Sync triggers to ensure functions are registered
+          - task: AzureCLI@2
+            displayName: 'Sync Azure Functions Triggers'
+            inputs:
+              azureSubscription: 'Laekning Service Connection'
+              scriptType: bash
+              scriptLocation: inlineScript
+              inlineScript: |
+                az functionapp sync-functions --name $(GenAIAppName) --resource-group LaekningTestResourceGroup
