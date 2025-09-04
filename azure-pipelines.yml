@@ -8,14 +8,13 @@ stages:
 # -------------------------------
 - stage: Package_FunctionApp
   displayName: "Package Python Function App"
-
+  variables:
+    - group: Release
   jobs:
   - job: Package_FunctionApp
     displayName: Build
     pool:
       vmImage: $(vmImageName)
-    variables:
-    - group: Release
 
     steps:
     - bash: |
@@ -58,15 +57,14 @@ stages:
   displayName: "Deploy Python Function App"
   dependsOn: Package_FunctionApp
   condition: succeeded()
-
+  variables:
+    - group: Release
   jobs:
   - deployment: Deploy
     displayName: Package_FunctionApp
     environment: 'development'
     pool:
       vmImage: $(vmImageName)
-    variables:
-    - group: Release
     strategy:
       runOnce:
         deploy:
