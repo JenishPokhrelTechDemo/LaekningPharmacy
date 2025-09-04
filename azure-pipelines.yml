@@ -2,8 +2,82 @@ trigger:
 - '*'
   
 stages:
+
 # -------------------------------
-# Stage 1: Build ASP.NET Core App
+# Stage 1: Package Python Function App
+# -------------------------------
+- stage: Package_FunctionApp
+  displayName: "Package Python Function App"
+
+  jobs:
+  - job: Package_FunctionApp
+    displayName: Build
+    pool:
+      vmImage: $(vmImageName)
+
+    steps:
+    - bash: |
+        if [ -f extensions.csproj ]
+        then
+            dotnet build extensions.csproj --runtime ubuntu.22.04-x64 --output ./bin 
+        fi
+      workingDirectory: $(workingDirectory)
+      displayName: 'Build extensions'
+
+    - task: UsePythonVersion@0
+      displayName: 'Use Python 3.11'
+      inputs:
+        versionSpec: 3.11
+
+    - bash: |
+        python -m venv antenv
+        source antenv/bin/activate
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt --target="./.python_packages/lib/site-packages"
+      workingDirectory: $(workingDirectory)
+      displayName: 'Install application dependencies'
+
+    - task: ArchiveFiles@2
+      displayName: 'Archive files'
+      inputs:
+        rootFolderOrFile: '$(workingDirectory)'
+        includeRootFolder: false
+        archiveType: zip
+        archiveFile: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
+        replaceExistingArchive: true
+
+    - publish: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
+      artifact: drop
+
+# -------------------------------
+# Stage 2: Deploy Python Function App
+# -------------------------------
+- stage: Deploy_FunctionApp
+  displayName: "Deploy Python Function App"
+  dependsOn: Package_FunctionApp
+  condition: succeeded()
+
+  jobs:
+  - deployment: Deploy
+    displayName: Package_FunctionApp
+    environment: 'development'
+    pool:
+      vmImage: $(vmImageName)
+
+    strategy:
+      runOnce:
+        deploy:
+
+          steps:
+          - task: AzureFunctionApp@2
+            displayName: 'Azure functions app deploy'
+            inputs:
+              azureSubscription: '$(azureSubscription)'
+              appType: functionAppLinux
+              appName: $(functionAppName)
+              package: '$(Pipeline.Workspace)/drop/$(Build.BuildId).zip'
+# -------------------------------
+# Stage 3: Build ASP.NET Core App
 # -------------------------------
 - stage: Build_ASPNET
   displayName: "Build ASP.NET Core App"
@@ -38,7 +112,7 @@ stages:
         projects: 'Laekning/Laekning.csproj'
 
 # -------------------------------
-# Stage 2: Run Unit Tests
+# Stage 4: Run Unit Tests
 # -------------------------------
 - stage: Test_ASPNET
   variables:
@@ -67,7 +141,7 @@ stages:
         
         
 # -------------------------------
-# Stage 3: Publish ASP.NET Core App
+# Stage 5: Publish ASP.NET Core App
 # -------------------------------
 - stage: Publish_ASPNET
   displayName: "Publish ASP.NET Core App"
@@ -99,7 +173,7 @@ stages:
 
 
 # -------------------------------
-# Stage 4: Deploy ASP.NET Core App
+# Stage 6: Deploy ASP.NET Core App
 # -------------------------------
 - stage: Deploy_ASPNET
   displayName: "Deploy the web application"
