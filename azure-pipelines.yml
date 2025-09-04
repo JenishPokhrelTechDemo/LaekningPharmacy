@@ -1,5 +1,8 @@
 trigger:
 - '*'
+
+variables:
+  - group: Release
   
 stages:
 
@@ -8,8 +11,7 @@ stages:
 # -------------------------------
 - stage: Package_FunctionApp
   displayName: "Package Python Function App"
-  variables:
-    - group: Release
+  
   jobs:
   - job: Package_FunctionApp
     displayName: Build
@@ -57,8 +59,6 @@ stages:
   displayName: "Deploy Python Function App"
   dependsOn: Package_FunctionApp
   condition: succeeded()
-  variables:
-    - group: Release
   jobs:
   - deployment: Deploy
     displayName: Package_FunctionApp
