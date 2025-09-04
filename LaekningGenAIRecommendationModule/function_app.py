@@ -7,24 +7,6 @@ from azure.identity import DefaultAzureCredential
 from azure.keyvault.secrets import SecretClient
 
 # -----------------------
-# Load secrets from Azure Key Vault
-# -----------------------
-KV_URI = os.getenv("KEYVAULT_URI")
-credential = DefaultAzureCredential()
-secret_client = SecretClient(vault_url=KV_URI, credential=credential)
-
-AZURE_OPENAI_KEY = secret_client.get_secret("AzureOpenAIDeploymentKeyTwo").value
-AZURE_OPENAI_ENDPOINT = secret_client.get_secret("AzureOpenAIEndpoint").value
-AZURE_OPENAI_DEPLOYMENT = secret_client.get_secret("AzureOpenAIDeploymentName").value  
-AZURE_OPENAI_API_VERSION = secret_client.get_secret("AzureOpenAIAPIVersion").value
-SQL_CONN_STRING = secret_client.get_secret("PythonSQLConnectionString").value
-
-client = AzureOpenAI(
-    api_key=AZURE_OPENAI_KEY,
-    azure_endpoint=AZURE_OPENAI_ENDPOINT,
-    api_version=AZURE_OPENAI_API_VERSION
-)
-# -----------------------
 # DB Helper
 # -----------------------
 def get_all_products_from_db():
@@ -43,10 +25,28 @@ def get_all_products_from_db():
 # -----------------------
 app = func.FunctionApp()
 
+def get_secret(name: str):
+    kv_uri = os.getenv("KEYVAULT_URI")
+    cred = DefaultAzureCredential()
+    client = SecretClient(vault_url=kv_uri, credential=cred)
+    return client.get_secret(name).value
+
 @app.function_name(name="recommend")
 @app.route(route="recommend", auth_level=func.AuthLevel.FUNCTION, methods=["POST"])
 def recommend(req: func.HttpRequest) -> func.HttpResponse:
     try:
+        # Lazy load secrets
+        AZURE_OPENAI_KEY = get_secret("AzureOpenAIDeploymentKeyTwo")
+        AZURE_OPENAI_ENDPOINT = get_secret("AzureOpenAIEndpoint")
+        AZURE_OPENAI_DEPLOYMENT = get_secret("AzureOpenAIDeploymentName")
+        AZURE_OPENAI_API_VERSION = get_secret("AzureOpenAIApiVersion")
+
+        client = AzureOpenAI(
+            api_key=AZURE_OPENAI_KEY,
+            azure_endpoint=AZURE_OPENAI_ENDPOINT,
+            api_version=AZURE_OPENAI_API_VERSION
+        )
+    
         req_body = req.get_json()
         purchased = req_body.get("purchasedProducts", [])
         all_products = req_body.get("allDbProductNames", [])
@@ -107,5 +107,4 @@ def recommend(req: func.HttpRequest) -> func.HttpResponse:
             status_code=500,
             mimetype="application/json"
         )
-
 
