@@ -81,8 +81,9 @@ namespace Laekning.Pages
         {
             if (uploadedFile != null && uploadedFile.Length > 0)
             {
-                var uploadsFolder = Path.Combine(_env.WebRootPath, "prescriptionimages");
-                Directory.CreateDirectory(uploadsFolder);
+                var uploadsFolder = Path.Combine(_env.ContentRootPath, "App_Data", "prescriptionimages");
+				Directory.CreateDirectory(uploadsFolder);
+
 
                 var filePath = Path.Combine(uploadsFolder, uploadedFile.FileName);
                 using (var fs = new FileStream(filePath, FileMode.Create))
@@ -111,7 +112,8 @@ namespace Laekning.Pages
         {
             if (!string.IsNullOrEmpty(UploadedFileName))
             {
-                var localFilePath = Path.Combine(_env.WebRootPath, "prescriptionimages", UploadedFileName);
+                var localFilePath = Path.Combine(_env.ContentRootPath, "App_Data", "prescriptionimages", UploadedFileName);
+
 
                 if (System.IO.File.Exists(localFilePath))
                 {
@@ -191,7 +193,7 @@ namespace Laekning.Pages
         {
             if (!string.IsNullOrEmpty(UploadedFileName))
             {
-                var uploadsFolder = Path.Combine(_env.WebRootPath, "prescriptionimages");
+                var uploadsFolder = Path.Combine(_env.ContentRootPath, "App_Data", "prescriptionimages");
                 var filePath = Path.Combine(uploadsFolder, UploadedFileName);
 
                 if (System.IO.File.Exists(filePath))
