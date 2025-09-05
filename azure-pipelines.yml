@@ -50,7 +50,7 @@ stages:
         replaceExistingArchive: true
 
     - publish: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
-      artifact: drop
+      artifact: drop-function
 
 # -------------------------------
 # Stage 2: Deploy Python Function App
@@ -76,13 +76,14 @@ stages:
               azureSubscription: '$(azureSubscription)'
               appType: functionAppLinux
               appName: $(functionAppName)
-              package: '$(Pipeline.Workspace)/drop/$(Build.BuildId).zip'
+              package: '$(Pipeline.Workspace)/drop-function/$(Build.BuildId).zip'
 
 # -------------------------------
 # Stage 3: Build ASP.NET Core App
 # -------------------------------
 - stage: Build_ASPNET
   displayName: "Build ASP.NET Core App"
+  dependsOn: Deploy_FunctionApp
   jobs:
   - job: Build_ASPNET
     pool:
