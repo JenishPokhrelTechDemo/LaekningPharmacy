@@ -8,7 +8,7 @@
     <title>Prescription Drug Identifier</title>
     <link href="/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
     <link href="/lib/font-awesome/css/all.min.css" rel="stylesheet" />
-    <style>
+     <style>
         .support-container {
             display: flex;
             flex-direction: row;
@@ -113,41 +113,13 @@
                          ondrop="handleDrop(event)">
 
                         <p class="silver-text-subtext">@Model.Description</p>
-
-                        @if (!string.IsNullOrEmpty(Model.UploadResult))
-                        {
-                            <p class="text-success mt-2">@Model.UploadResult</p>
-
-                            <!-- Image Preview with spacing -->
-                            <div class="mt-3 mb-3">
-                                <img src="~/prescriptionimages/@Model.UploadedFileName"
-                                     alt="Uploaded Prescription"
-                                     class="img-fluid rounded shadow-sm"
-                                     style="max-width: 100%; max-height: 400px;" />
-                            </div>
-                        }
+                        
                     </div>
 
                     <!-- Hidden file input -->
                     <input type="file" name="uploadedFile" id="fileInput" class="hidden-file-input" onchange="document.getElementById('uploadForm').submit();" />
                 </form>
-                <!-- Upload Form ends -->
-
-                <!-- Buttons: Discard and Upload to Blob Storage -->
-                @if (!string.IsNullOrEmpty(Model.UploadResult))
-                {
-                    <div class="btn-group">
-                        <form method="post" asp-page-handler="Delete">
-                            <input type="hidden" name="UploadedFileName" value="@Model.UploadedFileName" />
-                            <button type="submit" class="btn btn-outline-danger">Discard</button>
-                        </form>
-						
-						<form method="post" asp-page-handler="UploadToBlob">
-                            <input type="hidden" name="UploadedFileName" value="@Model.UploadedFileName" />
-                            <button type="submit" class="btn btn-outline-primary">Upload to Blob</button>
-						</form>
-                    </div>
-                }
+               
 
             </div>
         </div>

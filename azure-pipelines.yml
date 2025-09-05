@@ -7,6 +7,7 @@ variables:
 stages:
 
 
+
 # -------------------------------
 # Stage 3: Build ASP.NET Core App
 # -------------------------------
@@ -129,4 +130,5 @@ stages:
               azureSubscription: 'Laekning Service Connection'
               appName: '$(WebAppName)'
               package: '$(Pipeline.Workspace)/drop/$(buildConfiguration)/*.zip'
+
 
