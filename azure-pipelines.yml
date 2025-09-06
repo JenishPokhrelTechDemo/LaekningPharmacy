@@ -7,7 +7,6 @@ variables:
 stages:
 
 
-
 # -------------------------------
 # Stage 3: Build ASP.NET Core App
 # -------------------------------

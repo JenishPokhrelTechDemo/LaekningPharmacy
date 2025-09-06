@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
 using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Specialized;
 using Azure;
 using Azure.AI.DocumentIntelligence;
 using Microsoft.Extensions.Logging;
@@ -27,8 +28,6 @@ namespace Laekning.Pages
 		private string ModelId; 
 		private string Endpoint; 
 		private string ApiKey;
-
-		
 		private readonly EventHubSender _eventHub;
 
         public PrescriptionOCRModel(IWebHostEnvironment env, ILogger<PrescriptionOCRModel> logger, EventHubSender eventHub, IConfiguration config)
@@ -46,6 +45,9 @@ namespace Laekning.Pages
 
         [BindProperty(SupportsGet = true)]
         public string UploadedFileName { get; set; }
+		
+		[BindProperty(SupportsGet = true)]
+		public string UploadedFileUrl {get; set;}
 
         public string Title { get; set; } = "Prescription Drug Identifier";
         public string Description { get; set; } = "Drag and drop a file or browse.";
@@ -53,8 +55,6 @@ namespace Laekning.Pages
 
         public string extractedInscription { get; set; }
         public string ExtractedPatientDetails { get; set; }
-		public string UploadedFileUrl { get; set; }
-
 		
 		// Initialize secrets from Key Vault
         private async Task InitializeSecretsAsync()
@@ -77,115 +77,157 @@ namespace Laekning.Pages
 			Endpoint = secretDocumentIntelligenceEndpoint.Value;
             ApiKey = secretDocumentIntelligenceAPIKey.Value;
         }
+
 		
-        public async Task<IActionResult> OnPostAsync()
-        {
-            if (uploadedFile != null && uploadedFile.Length > 0)
-            {
-                await InitializeSecretsAsync();
 
-                UploadedFileName = uploadedFile.FileName;
+        public async Task OnPostAsync()
+		{
+			await InitializeSecretsAsync();
+			if (uploadedFile != null && uploadedFile.Length > 0)
+				{
+				// Use your container name (e.g., "prescriptionimages")
+				string containerName = ContainerName;
+				string blobName = uploadedFile.FileName;
 
-                // Upload directly to blob storage
-                var blobServiceClient = new BlobServiceClient(new Uri(BlobUri));
-                var containerClient = blobServiceClient.GetBlobContainerClient(ContainerName);
+				// Create the container client (connection string should be in config or KeyVault)
+				var blobServiceClient = new BlobServiceClient(new Uri(BlobUri));
+                var containerClient = blobServiceClient.GetBlobContainerClient(containerName);
                 await containerClient.CreateIfNotExistsAsync();
 
-                var blobClient = containerClient.GetBlobClient(UploadedFileName);
-                using (var stream = uploadedFile.OpenReadStream())
-                {
-                    await blobClient.UploadAsync(stream, overwrite: true);
-                }
-				// Save full blob URL for the view
-				UploadedFileUrl = blobClient.Uri.ToString();
+				// Get a reference to the blob
+				var blobClient = containerClient.GetBlobClient(blobName);
+
+				// Upload the file stream
+				using (var stream = uploadedFile.OpenReadStream())
+				{
+					await blobClient.UploadAsync(stream, overwrite: true);
+				}
+
+				UploadedFileName = blobName;
+				UploadedFileUrl = blobClient.Uri.ToString(); 
+				UploadResult = $"Uploaded to blob storage: {UploadedFileName}";
+				
+				_logger.LogInformation("File uploaded to blob storage: {File}", UploadedFileName);
+
+				// Send "PrescriptionUploaded" event
+				var uploadEvent = new
+				{
+					EventType = "PrescriptionUploaded",
+					PrescriptionId = Guid.NewGuid().ToString(),
+					FileName = UploadedFileName,
+					UploadedBy = User.Identity?.Name ?? "Anonymous",
+					Timestamp = DateTime.UtcNow,
+					BlobUrl = blobClient.Uri.ToString()
+				};
+				await _eventHub.SendAsync(uploadEvent);
+			}
+		}
+		
+		
+		public async Task<IActionResult> OnPostUploadToBlobAsync()
+		{
+			await InitializeSecretsAsync();
+
+			if (!string.IsNullOrEmpty(UploadedFileName) && !string.IsNullOrEmpty(UploadedFileUrl))
+			{	
+                    // Analyze using Document Intelligence
+					// Build client
+					var credential = new AzureKeyCredential(ApiKey);
+					var client = new DocumentIntelligenceClient(new Uri(Endpoint), credential);
+
+					// Analyze the document from blob URL
+					// Start the analysis
+					var operation = await client.AnalyzeDocumentAsync(WaitUntil.Completed, ModelId, new Uri(UploadedFileUrl));
+
+					// Get the result from the operation
+					AnalyzeResult analyzeResult = operation.Value;
 
 
-                UploadResult = $"Uploaded to Blob: {UploadedFileName}";
-                _logger.LogInformation("File uploaded to Blob Storage: {File}", UploadedFileName);
-
-                // Send "PrescriptionUploaded" event
-                var uploadEvent = new
-                {
-                    EventType = "PrescriptionUploaded",
-                    PrescriptionId = Guid.NewGuid().ToString(),
-                    FileName = UploadedFileName,
-                    UploadedBy = User.Identity?.Name ?? "Anonymous",
-                    Timestamp = DateTime.UtcNow
-                };
-                await _eventHub.SendAsync(uploadEvent);
-
-                // Analyze using Document Intelligence
-                var credential = new AzureKeyCredential(ApiKey);
-                var client = new DocumentIntelligenceClient(new Uri(Endpoint), credential);
-                var analyzeResult = await client.AnalyzeDocumentAsync(WaitUntil.Completed, ModelId, blobClient.Uri);
-
-                if (analyzeResult.Value.Documents.Count > 0)
-                {
-                    var doc = analyzeResult.Value.Documents[0].Fields;
-
-                    if (doc.TryGetValue("Inscription", out var inscriptionField))
+                    if (analyzeResult.Documents.Count > 0)
                     {
-                        extractedInscription = inscriptionField.Content;
+                        var doc = analyzeResult.Documents[0].Fields;
+
+                        if (doc.TryGetValue("Inscription", out var inscriptionField))
+                        {
+                            extractedInscription = inscriptionField.Content;
+                        }
+
+                        if (doc.TryGetValue("Patient Details", out var patientField))
+                        {
+                            ExtractedPatientDetails = patientField.Content;
+                        }
+
+                        _logger.LogInformation("Extracted: Inscription = {Inscription}, Patient Details = {Patient}",
+                            extractedInscription, ExtractedPatientDetails);
+
+                        UploadResult += $" → Inscription: {extractedInscription}";
+                        if (!string.IsNullOrEmpty(ExtractedPatientDetails))
+                            UploadResult += $" | Patient: {ExtractedPatientDetails}";
+						
+						
+						//Send "PrescriptionAnalyzed" event
+						var analyzedEvent = new
+						{
+							EventType = "PrescriptionAnalyzed",
+							PrescriptionId = Guid.NewGuid().ToString(), // or reuse from uploadEvent if you link them
+							ExtractedInscription = extractedInscription,
+							ExtractedPatientDetails = ExtractedPatientDetails,
+							Timestamp = DateTime.UtcNow,
+							ProcessedBy = "DocumentIntelligence-OCR"
+						};
+						
+						await _eventHub.SendAsync(analyzedEvent);
+
+
+                        //  FIX: Redirect with correct query string name
+                        return RedirectToPage("SearchResults", new { ExtractedInscription = extractedInscription });
                     }
-
-                    if (doc.TryGetValue("Patient Details", out var patientField))
+                    else
                     {
-                        ExtractedPatientDetails = patientField.Content;
+                        _logger.LogWarning("No documents found in analysis result.");
+                        UploadResult += " → No data extracted.";
                     }
-
-                    _logger.LogInformation("Extracted: Inscription = {Inscription}, Patient Details = {Patient}",
-                        extractedInscription, ExtractedPatientDetails);
-
-                    UploadResult += $" → Inscription: {extractedInscription}";
-                    if (!string.IsNullOrEmpty(ExtractedPatientDetails))
-                        UploadResult += $" | Patient: {ExtractedPatientDetails}";
-
-                    // Send "PrescriptionAnalyzed" event
-                    var analyzedEvent = new
-                    {
-                        EventType = "PrescriptionAnalyzed",
-                        PrescriptionId = Guid.NewGuid().ToString(),
-                        ExtractedInscription = extractedInscription,
-                        ExtractedPatientDetails = ExtractedPatientDetails,
-                        Timestamp = DateTime.UtcNow,
-                        ProcessedBy = "DocumentIntelligence-OCR"
-                    };
-
-                    await _eventHub.SendAsync(analyzedEvent);
-
-                    // Redirect to results page
-                    return RedirectToPage("SearchResults", new { ExtractedInscription = extractedInscription });
                 }
                 else
                 {
-                    _logger.LogWarning("No documents found in analysis result.");
-                    UploadResult += " → No data extracted.";
+                    _logger.LogWarning("File not found");
+                    UploadResult = "The product is either out of stock or doesn't exist.";
                 }
-            }
+			
+			return Page();
+			
+		}
+        
 
-            return Page();
-        }
+       
+		public async Task<IActionResult> OnPostDeleteAsync()
+			{
+				await InitializeSecretsAsync();
+				if (!string.IsNullOrEmpty(UploadedFileName))
+					{
+						// Use the same container name as in upload
+						string containerName = ContainerName;
 
-        public async Task<IActionResult> OnPostDeleteAsync()
-        {
-            if (!string.IsNullOrEmpty(UploadedFileName))
-            {
-                await InitializeSecretsAsync();
+						// Create BlobServiceClient from connection string
+						var blobServiceClient = new BlobServiceClient(new Uri(BlobUri));
+						var containerClient = blobServiceClient.GetBlobContainerClient(containerName);
+						
+						// Get a reference to the blob
+						var blobClient = containerClient.GetBlobClient(UploadedFileName);
 
-                var blobServiceClient = new BlobServiceClient(new Uri(BlobUri));
-                var containerClient = blobServiceClient.GetBlobContainerClient(ContainerName);
-                var blobClient = containerClient.GetBlobClient(UploadedFileName);
+						// Delete if exists
+						await blobClient.DeleteIfExistsAsync();
 
-                await blobClient.DeleteIfExistsAsync();
-                _logger.LogInformation("Deleted blob: {File}", UploadedFileName);
+						_logger.LogInformation("Deleted blob: {BlobName}", UploadedFileName);
+					}
 
-                UploadedFileName = null;
+				UploadedFileName = null;
 				UploadedFileUrl = null;
-                UploadResult = null;
-            }
+				UploadResult = null;
 
-            return RedirectToPage();
-        }
+				return RedirectToPage();
+			}
+
     }
 }
 
