@@ -2,6 +2,10 @@
 @page "/admin/products/create"
 @inherits OwningComponentBase<IStoreRepository>
 @using Microsoft.AspNetCore.Components.Forms
+@using Azure.Identity
+@using Azure.Security.KeyVault.Secrets
+@using Azure.Storage.Blobs
+@using Azure.Storage.Blobs.Specialized
 @inject IWebHostEnvironment Env
 
 <style>
@@ -138,7 +142,7 @@
     {
         <div class="mb-3">
             <label class="white-glow-text section-label">Image Preview:</label><br />
-            <img src="@($"/images/{Product.Image}")"
+            <img src="@UploadedFileUrl"
                  alt="Preview"
                  style="max-height: 150px; border-radius: 8px; box-shadow: 0 0 6px #000;" />
         </div>
@@ -162,6 +166,17 @@
     public Product Product { get; set; } = new Product();
 
     private IBrowserFile? uploadedFile;
+	
+	private string BlobUri; 
+	private string ImageContainerName; 
+	
+    public string UploadedFileName { get; set; }
+		
+	public string UploadedFileUrl {get; set;}
+	
+	[Inject]
+	public IConfiguration Config { get; set; } = default!;
+
 
     protected override void OnParametersSet()
     {
@@ -170,18 +185,49 @@
             Product = Repository.Products.FirstOrDefault(p => p.ProductID == Id) ?? new();
         }
     }
+	
+	// Initialize secrets from Key Vault
+    private async Task InitializeSecretsAsync()
+    {
+            if (!string.IsNullOrEmpty(BlobUri) && !string.IsNullOrEmpty(ImageContainerName))
+				return; // already initialized
+
+            string vaultUri = Config["AzureKeyVault:KeyVaultUrl"];
+            var client = new SecretClient(new Uri(vaultUri), new DefaultAzureCredential());
+			
+			KeyVaultSecret secretBlobUri = await client.GetSecretAsync("BlobUri");
+			KeyVaultSecret secretImageContainerName = await client.GetSecretAsync("ImageContainerName");
+			
+            BlobUri = secretBlobUri.Value; 
+            ImageContainerName = secretImageContainerName.Value;
+    }
 
     private async Task HandleImageUpload(InputFileChangeEventArgs e)
     {
-        uploadedFile = e.File;
-        var uploadsFolder = Path.Combine(Env.WebRootPath, "images");
-        var filePath = Path.Combine(uploadsFolder, uploadedFile.Name);
+		await InitializeSecretsAsync();
+		
+		uploadedFile = e.File;
+		
+		string imageContainerName = ImageContainerName;
+		string blobName = uploadedFile.Name;
 
-        Directory.CreateDirectory(uploadsFolder);
+		// Create the container client (connection string should be in config or KeyVault)
+		var blobServiceClient = new BlobServiceClient(new Uri(BlobUri));
+        var ImageContainerClient = blobServiceClient.GetBlobContainerClient(ImageContainerName);
+        await ImageContainerClient.CreateIfNotExistsAsync();
 
-        await using var fs = File.Create(filePath);
-        await uploadedFile.OpenReadStream().CopyToAsync(fs);
+		// Get a reference to the blob
+		var blobClient = ImageContainerClient.GetBlobClient(blobName);
 
+		// Upload the file stream
+		using (var stream = uploadedFile.OpenReadStream())
+		{
+			await blobClient.UploadAsync(stream, overwrite: true);
+		}
+
+		UploadedFileName = blobName;
+		UploadedFileUrl = blobClient.Uri.ToString(); 
+	
         Product.Image = uploadedFile.Name;
     }
 
