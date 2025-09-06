@@ -101,10 +101,12 @@
         <!-- Right Section: Icons & Search -->
         <div class="navbar-icons">
             <a href="/admin"><i class="fas fa-user"></i></a>
-            <div class="search-bar">
-                <input type="text" class="search-input" placeholder="Search Laekning">
-                <button class="btn btn-outline-info"><i class="fas fa-search"></i></button>
-            </div>
+            <form method="get" asp-page="/SearchResults" class="search-bar">
+				<input type="text" name="ExtractedInscription" class="search-input" placeholder="Search Laekning"/>
+					<button type="submit" class="btn btn-outline-info">
+						<i class="fas fa-search"></i>
+					</button>
+			</form>
             <a asp-page="/Cart" asp-route-returnUrl="@Context.Request.Path" class="cart-icon"><i class="fas fa-shopping-cart"></i></a>
         </div>
     </div>
