@@ -6,84 +6,14 @@ variables:
   
 stages:
 
-# -------------------------------
-# Stage 1: Package Python Function App
-# -------------------------------
-- stage: Package_FunctionApp
-  displayName: "Package Python Function App"
-  
-  jobs:
-  - job: Package_FunctionApp
-    displayName: Build
-    pool:
-      vmImage: $(vmImageName)
 
-    steps:
-    - bash: |
-        if [ -f extensions.csproj ]
-        then
-            dotnet build extensions.csproj --runtime ubuntu.22.04-x64 --output ./bin 
-        fi
-      workingDirectory: $(workingDirectory)
-      displayName: 'Build extensions'
-
-    - task: UsePythonVersion@0
-      displayName: 'Use Python 3.11'
-      inputs:
-        versionSpec: 3.11
-
-    - bash: |
-        python -m venv antenv
-        source antenv/bin/activate
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt --target="./.python_packages/lib/site-packages"
-      workingDirectory: $(workingDirectory)
-      displayName: 'Install application dependencies'
-
-    - task: ArchiveFiles@2
-      displayName: 'Archive files'
-      inputs:
-        rootFolderOrFile: '$(workingDirectory)'
-        includeRootFolder: false
-        archiveType: zip
-        archiveFile: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
-        replaceExistingArchive: true
-
-    - publish: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
-      artifact: drop-function
-
-# -------------------------------
-# Stage 2: Deploy Python Function App
-# -------------------------------
-- stage: Deploy_FunctionApp
-  displayName: "Deploy Python Function App"
-  dependsOn: Package_FunctionApp
-  condition: succeeded()
-  jobs:
-  - deployment: Deploy
-    displayName: Package_FunctionApp
-    environment: 'development'
-    pool:
-      vmImage: $(vmImageName)
-    strategy:
-      runOnce:
-        deploy:
-
-          steps:
-          - task: AzureFunctionApp@2
-            displayName: 'Azure functions app deploy'
-            inputs:
-              azureSubscription: '$(azureSubscription)'
-              appType: functionAppLinux
-              appName: $(functionAppName)
-              package: '$(Pipeline.Workspace)/drop-function/$(Build.BuildId).zip'
 
 # -------------------------------
 # Stage 3: Build ASP.NET Core App
 # -------------------------------
 - stage: Build_ASPNET
   displayName: "Build ASP.NET Core App"
-  dependsOn: Deploy_FunctionApp
+  #dependsOn: Deploy_FunctionApp
   jobs:
   - job: Build_ASPNET
     pool:
@@ -201,37 +131,4 @@ stages:
               appName: '$(WebAppName)'
               package: '$(Pipeline.Workspace)/drop/$(buildConfiguration)/*.zip'
 
-
-# -------------------------------
-# Stage 7: Build and Publish C++ EventHub Module
-# -------------------------------
-- stage: Build_EventHub
-  dependsOn: Deploy_ASPNET
-  variables:
-    buildConfiguration: 'Release'
-  displayName: "Build C++ EventHub"
-  jobs:
-  - job: Build_EventHub
-    pool:
-      vmImage: 'windows-latest'
-
-    steps:
-    - task: CMake@1
-      displayName: Configure
-      inputs:
-        workingDirectory: 'LaekningEventHub'
-        cmakeArgs: '-B build -S . -G "Visual Studio 17 2022" -A x64'
-
-    - task: CMake@1
-      displayName: Build
-      inputs:
-        workingDirectory: 'LaekningEventHub'
-        cmakeArgs: '--build build --config Release'
-
-    - task: PublishBuildArtifacts@1
-      displayName: Publish Executable
-      inputs:
-        PathtoPublish: 'LaekningEventHub/build/Release'
-        ArtifactName: 'drop'
-        publishLocation: 'Container'
 
