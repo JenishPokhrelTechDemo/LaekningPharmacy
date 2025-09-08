@@ -1,15 +1,13 @@
-@model IEnumerable<string>  <!-- The view expects a list of product category names -->
+@model IEnumerable<string>
 
 <div class="dropdown-menu" aria-labelledby="productsDropdown">
-    @* Loop through each category in the model; use an empty list if Model is null *@
     @foreach (var category in Model ?? Enumerable.Empty<string>())
     {
-        <a class="dropdown-item @(category == ViewBag.SelectedCategory ? "active" : "")"  
-           asp-action="Index"  <!-- Link will call the Index action in the controller -->
-           asp-controller="Home"  <!-- Use HomeController -->
-           asp-route-category="@category"  <!-- Pass the category as a route parameter -->
-           asp-route-productPage="1">  <!-- Start at page 1 for pagination -->
-            @category  <!-- Display the category name as link text -->
+        <a class="dropdown-item @(category == ViewBag.SelectedCategory ? "active" : "")"
+           asp-action="Index" asp-controller="Home"
+           asp-route-category="@category"
+           asp-route-productPage="1">
+            @category
         </a>
     }
 </div>

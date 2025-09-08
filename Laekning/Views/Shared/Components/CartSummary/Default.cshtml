@@ -1,22 +1,17 @@
-@model Cart  <!-- The view expects a Cart model to access the user's shopping cart -->
+@model Cart
 
 <div>
-    @* Check if the cart has any items *@
-    @if(Model.Lines.Count() > 0){
-        <small class="navbar-text">
-            <b>Your cart:</b>
-            @* Display total quantity of items in the cart *@
-            @Model.Lines.Sum(x => x.Quantity) item(s)
-            @* Display total value of the cart, formatted as currency *@
-            @Model.ComputeTotalValue().ToString("c")
-        </small>
-    }
-
-    @* Shopping cart button linking to the Cart page *@
-    <a class="btn btn-sm btn-secondary navbar-btn" 
-       asp-page="/Cart"  <!-- Razor Pages link to the Cart page -->
-       asp-route-returnurl="@ViewContext.HttpContext.Request.PathAndQuery()">
-       @* Pass the current page URL as ReturnUrl so the user can return after viewing the cart *@
-        <i class="fa fa-shopping-cart"></i> <!-- Font Awesome cart icon -->
-    </a>
+	@if(Model.Lines.Count() > 0){
+			<small class="navbar-text">
+				<b>Your cart:</b>
+				@Model.Lines.Sum(x => x.Quantity) item(s)
+				@Model.ComputeTotalValue().ToString("c")
+			</small>
+	}
+	
+	<a class="btn btn-sm btn-secondary navbar-btn" asp-page="/Cart"
+		asp-route-returnurl=
+			"@ViewContext.HttpContext.Request.PathAndQuery()">
+		<i class="fa fa-shopping-cart"></i>
+	</a>
 </div>
