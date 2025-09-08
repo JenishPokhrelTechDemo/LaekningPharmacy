@@ -24,3 +24,5 @@
             context.Remove(p);    // Mark the product for deletion
             context.SaveChanges(); // Commit changes to the database
         }
+	}
+}
