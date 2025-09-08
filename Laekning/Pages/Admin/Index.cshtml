@@ -1,17 +1,22 @@
-﻿@page "/admin"
-@{  Layout = null; }
+﻿@page "/admin"                     // Defines the route for this Razor Page as "/admin"
+@{ Layout = null; }                // No shared layout file will be used (standalone page)
 @using Microsoft.AspNetCore.Authorization
-@attribute [Authorize]
+@attribute [Authorize]             // Restricts access: only authenticated/authorized users can view this page
 
 <!DOCTYPE html>
 <html>
 <head>
     <title>Laekning Admin</title>
+    <!-- Load Bootstrap for styling -->
     <link href="/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+    <!-- Base URL for resolving relative paths -->
     <base href="/" />  
 </head>
 <body>    
+    <!-- Render the Blazor Routed component on this page -->
     <component type="typeof(Routed)" render-mode="Server" />
+    
+    <!-- Load Blazor Server runtime script -->
     <script src="/_framework/blazor.server.js"></script>
 </body>
 </html>

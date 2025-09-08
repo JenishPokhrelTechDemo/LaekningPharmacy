@@ -3,29 +3,35 @@
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.AspNetCore.Authorization
 
+<!-- Page header for the admin user section -->
 <h3 class="bg-primary text-white text-center p-2">Admin User</h3>
 
+<!-- Table displaying basic admin user info -->
 <table class="table table-sm table-striped table-bordered">
     <tbody>
-        <tr><th>User</th><td>@Model.AdminUser?.UserName</td></tr>
-        <tr><th>Email</th><td>@Model.AdminUser?.Email</td></tr>
-        <tr><th>Phone</th><td>@Model.AdminUser?.PhoneNumber</td></tr>
+        <tr><th>User</th><td>@Model.AdminUser?.UserName</td></tr> <!-- Admin username -->
+        <tr><th>Email</th><td>@Model.AdminUser?.Email</td></tr> <!-- Admin email -->
+        <tr><th>Phone</th><td>@Model.AdminUser?.PhoneNumber</td></tr> <!-- Admin phone number -->
     </tbody>
 </table>
 
 @functions {
 
-    [Authorize]
+    [Authorize] // Only authorized users can access this page
     public class IdentityUsersModel : PageModel {
         private UserManager<IdentityUser> userManager;
 
+        // Constructor injects UserManager for working with Identity users
         public IdentityUsersModel(UserManager<IdentityUser> mgr) {
             userManager = mgr;
         }
 
+        // Holds the admin user object to display in the page
         public IdentityUser? AdminUser { get; set; } = new();
 
+        // Called on GET request to populate AdminUser
         public async Task OnGetAsync() {
+            // Retrieve the user with username "Admin"
             AdminUser = await userManager.FindByNameAsync("Admin");
         }
     }

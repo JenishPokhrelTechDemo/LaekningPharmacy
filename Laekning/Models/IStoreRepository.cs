@@ -1,14 +1,18 @@
 ﻿namespace Laekning.Models {
+
+    // Interface defining the contract for a store repository
     public interface IStoreRepository {
 
+        // Provides a queryable collection of all products in the store
         IQueryable<Product> Products { get; }
-		
-	
-		
-		void SaveProduct(Product p);
-		
-		void CreateProduct(Product p);
-		
-		void DeleteProduct(Product p);
+
+        // Save changes made to an existing product
+        void SaveProduct(Product p);
+
+        // Add a new product to the store
+        void CreateProduct(Product p);
+
+        // Remove a product from the store
+        void DeleteProduct(Product p);
     }
 }

@@ -2,18 +2,24 @@
 
 namespace Laekning.Models {
 
+    // Static class for seeding the database with initial products
     public static class SeedData {
 
+        // Ensures that the database is populated with default products
         public static void EnsurePopulated(IApplicationBuilder app) {
+            // Get the StoreDbContext from the application's service provider
             StoreDbContext context = app.ApplicationServices
                 .CreateScope().ServiceProvider
                 .GetRequiredService<StoreDbContext>();
 
+            // Apply any pending EF Core migrations to the database
             if (context.Database.GetPendingMigrations().Any()) {
                 context.Database.Migrate();
             }
 
+            // Check if there are no products in the database
             if (!context.Products.Any()) {
+                // Add a set of default products
                 context.Products.AddRange(
                     new Product {
                         Name = "Imodium",
@@ -38,7 +44,7 @@ namespace Laekning.Models {
                     },
                     new Product {
                         Name = "Amitriptyline",
-                        Description = "An antidepressant. Use only under the guidance of a psychatrist.",
+                        Description = "An antidepressant. Use only under the guidance of a psychiatrist.",
                         Category = "Antidepressant",
                         Price = 27m,
                         Image = "amitriptyline.jpg"
@@ -52,7 +58,7 @@ namespace Laekning.Models {
                     },
                     new Product {
                         Name = "Ibuprofen",
-                        Description = "An over the top antipyretic(fever reducer). Available variants include Advil and Motrin.",
+                        Description = "An over the top antipyretic (fever reducer). Available variants include Advil and Motrin.",
                         Category = "Antipyretic",
                         Price = 15m,
                         Image = "ibuprofen.jpg"
@@ -66,7 +72,7 @@ namespace Laekning.Models {
                     },
                     new Product {
                         Name = "Mucinex",
-                        Description = "Get 12 hours of relief from even the worst cold, flue and sinus symptoms.",
+                        Description = "Get 12 hours of relief from even the worst cold, flu and sinus symptoms.",
                         Category = "Cold reducer",
                         Price = 24m,
                         Image = "mucinex.jpg"
@@ -163,6 +169,8 @@ namespace Laekning.Models {
                         Image = "metoclopramide.jpeg"
                     }
                 );
+
+                // Save all changes to the database
                 context.SaveChanges();
             }
         }

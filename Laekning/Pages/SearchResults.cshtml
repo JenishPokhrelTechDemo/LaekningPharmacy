@@ -1,49 +1,70 @@
 @page
 @model Laekning.Pages.SearchResultsModel
 @{
-    ViewData["Title"] = "Search Results";
+    ViewData["Title"] = "Search Results"; // Page title for browser/tab
 }
 
+<!-- Check if search term is empty -->
 @if (string.IsNullOrWhiteSpace(Model.ExtractedInscription))
 {
-    <div class="alert alert-info mt-4">Please enter a search term.</div>
+    <div class="alert alert-info mt-4">
+        Please enter a search term.
+    </div>
 }
+<!-- Check if there are no matching products -->
 else if (Model.ProductsList == null || !Model.ProductsList.Any())
 {
     <div class="alert alert-warning mt-4">
         No products matched your search term: <strong>@Model.ExtractedInscription</strong>
     </div>
 }
+<!-- Display products if matches exist -->
 else
 {
     <div class="category-page">
-        <h2 class="custom-header">Search Results for the uploaded prescription</h2>
+        <h2 class="custom-header">Search Results</h2>
+
+        <!-- Container for product cards -->
         <div class="products-container">
             @foreach (var product in Model.ProductsList)
             {
+                // Use placeholder if product image is missing
                 var imageSrc = string.IsNullOrEmpty(product.Image) ? "/images/placeholder.png" : $"/images/{product.Image}";
 
                 <div class="product-card">
+                    <!-- Product image -->
                     <img src="@imageSrc" alt="@product.Name" class="img-fluid mb-2" style="height: 200px; object-fit: contain;" />
+                    
+                    <!-- Product name -->
                     <h5 class="text-info">@product.Name</h5>
+
+                    <!-- Product price -->
                     <p class="text-white font-weight-bold">$@product.Price</p>
+
+                    <!-- Product description -->
                     <p class="text-light small">@product.Description</p>
-					
-					
-					<!-- Add to Cart Form -->
-					<div class="button-container">
-						<form asp-page="/Cart" method="post">
-							<input type="hidden" name="productId" value="@product.ProductID" />
-							<input type="hidden" name="returnUrl" value="@ViewContext.HttpContext.Request.PathAndQuery()" />
-							<button type="submit" class="add-to-cart">Add To Cart</button>
-						</form>
-					</div>
+
+                    <!-- Add to Cart Form -->
+                    <div class="button-container">
+                        <form asp-page="/Cart" method="post">
+                            <!-- Pass product ID -->
+                            <input type="hidden" name="productId" value="@product.ProductID" />
+
+                            <!-- Pass current page URL to return after adding -->
+                            <input type="hidden" name="returnUrl" value="@ViewContext.HttpContext.Request.PathAndQuery()" />
+
+                            <!-- Submit button -->
+                            <button type="submit" class="add-to-cart">Add To Cart</button>
+                        </form>
+                    </div>
                 </div>
             }
         </div>
     </div>
 
+    <!-- Page-specific CSS -->
     <style>
+        /* Background image for the entire page */
         body {
             background-image: url('/images/molecular-illustration.jpg');
             background-size: cover;
@@ -51,6 +72,7 @@ else
             background-attachment: fixed;
         }
 
+        /* Flex container for product cards */
         .products-container {
             display: flex;
             flex-wrap: wrap;
@@ -59,6 +81,7 @@ else
             padding: 20px;
         }
 
+        /* Individual product card styling */
         .product-card {
             background: rgba(0, 0, 0, 0.6);
             border-radius: 10px;
@@ -72,65 +95,46 @@ else
             flex: 1 1 250px;
         }
 
+        /* Hover effect for product card */
         .product-card:hover {
             transform: scale(1.05);
             box-shadow: 0 6px 16px rgba(0, 255, 255, 0.5);
         }
-		
-		.add-to-cart {
-    background: cyan;
-    border: none;
-    color: black;
-    padding: 10px 20px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: background 0.3s ease;
-	}
 
-	.add-to-cart:hover {
-		background: #00a3a3;
-	}
-	
-	.button-container {
-    display: flex;
-    justify-content: center; /* centers horizontally */
-    margin-top: 20px; /* spacing above button */
-	}.add-to-cart {
-    background: cyan;
-    border: none;
-    color: black;
-    padding: 10px 20px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: background 0.3s ease;
-	}
+        /* Add-to-cart button styling */
+        .add-to-cart {
+            background: cyan;
+            border: none;
+            color: black;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s ease;
+        }
 
-	.add-to-cart:hover {
-		background: #00a3a3;
-	}
-	
-	.button-container {
-    display: flex;
-    justify-content: center; /* centers horizontally */
-    margin-top: 20px; /* spacing above button */
-	}
-	
-	.custom-header {
-        text-align: center;
-        font-size: 1.75rem;
-        margin-bottom: 1rem;
-        padding: 0.75rem;
-        background: rgba(255, 255, 255, 0.3);
-        border-radius: 12px;
-        box-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
-        color: #000;
-    }
+        /* Hover effect for add-to-cart button */
+        .add-to-cart:hover {
+            background: #00a3a3;
+        }
+
+        /* Container for centering buttons */
+        .button-container {
+            display: flex;
+            justify-content: center; /* horizontal centering */
+            margin-top: 20px; /* spacing above button */
+        }
+
+        /* Header styling for section */
+        .custom-header {
+            text-align: center;
+            font-size: 1.75rem;
+            margin-bottom: 1rem;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+            color: #000;
+        }
     </style>
-	
-	
 }
-
-
-

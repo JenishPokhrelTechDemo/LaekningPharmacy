@@ -1,50 +1,60 @@
 ﻿<table class="table table-sm table-striped table-bordered">
     <thead>
+        <!-- Table header with dynamic title -->
         <tr><th colspan="5" class="text-center">@TableTitle</th></tr>
     </thead>
     <tbody>
-        @if (Orders?.Count() > 0) {
-            @foreach (Order o in Orders) {
+        @if (Orders?.Count() > 0) {  <!-- Check if there are any orders -->
+            @foreach (Order o in Orders) {  <!-- Loop through each order -->
                 <tr>
-                    <td>@o.Name</td>
-                    <td>@o.Zip</td>
-                    <th>Product</th>
-                    <th>Quantity</th>
+                    <!-- Display order summary -->
+                    <td>@o.Name</td>          <!-- Customer name -->
+                    <td>@o.Zip</td>           <!-- Customer ZIP code -->
+                    <th>Product</th>          <!-- Placeholder column header -->
+                    <th>Quantity</th>         <!-- Placeholder column header -->
                     <td>
+                        <!-- Action button: invokes OrderSelected event callback -->
                         <button class="btn btn-sm btn-danger"
                         @onclick="@(e => 
                                 OrderSelected.InvokeAsync(o.OrderID))">
-                            @ButtonLabel
+                            @ButtonLabel   <!-- Dynamic label (e.g., Ship / Reset) -->
                         </button>
                     </td>
                 </tr>
+
+                <!-- Nested loop to show all products in the current order -->
                 @foreach (CartLine line in o.Lines) {
                     <tr>
-                        <td colspan="2"></td>
-                        <td>@line.Product.Name</td>
-                        <td>@line.Quantity</td>
-                        <td></td>
+                        <td colspan="2"></td>               <!-- Empty cells for alignment -->
+                        <td>@line.Product.Name</td>         <!-- Product name -->
+                        <td>@line.Quantity</td>             <!-- Product quantity -->
+                        <td></td>                           <!-- Empty cell for button column -->
                     </tr>
                 }
             }
         } else {
+            <!-- Message shown if there are no orders -->
             <tr><td colspan="5" class="text-center">No Orders</td></tr>
         }
     </tbody>
 </table>
 
 @code {
-
+    // Title of the table (e.g., "Unshipped Orders" or "Shipped Orders")
     [Parameter]
     public string TableTitle { get; set; } = "Orders";
 
+    // Collection of orders to display in this table
     [Parameter]
     public IEnumerable<Order> Orders { get; set; } 
         = Enumerable.Empty<Order>();
 
+    // Label for the action button (e.g., "Ship" or "Reset")
     [Parameter]
     public string ButtonLabel { get; set; } = "Ship";
 
+    // Event callback invoked when an order button is clicked
+    // Sends the OrderID of the selected order back to the parent component
     [Parameter]
     public EventCallback<int> OrderSelected { get; set; }
 }

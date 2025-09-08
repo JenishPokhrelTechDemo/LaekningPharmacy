@@ -1,14 +1,20 @@
 @page
 @model PrescriptionOCRModel
+<!-- This Razor Page is backed by the PrescriptionOCRModel -->
 
 <!DOCTYPE html>
 <html>
 <head>
     <meta name="viewport" content="width=device-width" />
     <title>Prescription Drug Identifier</title>
+
+    <!-- Bootstrap for styling -->
     <link href="/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+    <!-- Font Awesome for icons -->
     <link href="/lib/font-awesome/css/all.min.css" rel="stylesheet" />
+
     <style>
+        /* Container for the support page layout (sidebar + main content) */
         .support-container {
             display: flex;
             flex-direction: row;
@@ -17,6 +23,7 @@
             align-items: stretch;
         }
 
+        /* Sidebar styling */
         .support-sidebar {
             width: 250px;
             min-height: 300px;
@@ -27,6 +34,7 @@
             backdrop-filter: blur(8px);
         }
 
+        /* Main content area styling */
         .support-content {
             width: 100%;
             min-height: 600px;
@@ -39,6 +47,7 @@
             backdrop-filter: blur(8px);
         }
 
+        /* Silver gradient text for headings */
         .silver-text,
         .silver-text-heading,
         .silver-text-subtext {
@@ -52,11 +61,13 @@
             letter-spacing: 2px;
         }
 
+        /* Italicized and uppercase silver text for headings */
         .silver-text {
             font-style: italic;
             text-transform: uppercase;
         }
 
+        /* Glassy container styling for drag-and-drop file upload */
         .glassy-container {
             background: rgba(255, 255, 255, 0.2) !important;
             backdrop-filter: blur(20px) brightness(1.3);
@@ -71,24 +82,27 @@
             min-height: 200px;
             margin-left: auto;
             margin-right: auto;
-            cursor: pointer; /* Makes it look clickable */
+            cursor: pointer; /* Indicates it's clickable */
             transition: background 0.3s ease;
         }
 
+        /* Hover effect for glassy container */
         .glassy-container:hover {
             background: rgba(255, 255, 255, 0.3);
         }
-		
-		.glassy-container.dragover {
-			border: 2px dashed cyan;
-			background: rgba(255, 255, 255, 0.3);
-		}
 
+        /* Styling when dragging a file over the container */
+        .glassy-container.dragover {
+            border: 2px dashed cyan;
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Hidden file input element for manual file selection */
         .hidden-file-input {
             display: none;
         }
 
-        /* Spacing between buttons */
+        /* Button group spacing */
         .btn-group {
             margin-top: 1rem;
             display: flex;
@@ -101,56 +115,59 @@
     <div class="container mt-4">
         <div class="support-container">
             <div class="support-content">
+                <!-- Page Title -->
                 <h4 class="silver-text">@Model.Title</h4>
 
-                <!-- Upload Form starts -->
+                <!-- Upload Form -->
                 <form method="post" enctype="multipart/form-data" id="uploadForm">
-					<div class="glassy-container"
-						id="dropZone"
-						onclick="document.getElementById('fileInput').click();"
-						ondragover="handleDragOver(event)"
-						ondragleave="handleDragLeave(event)"
-						ondrop="handleDrop(event)">
+                    <div class="glassy-container"
+                         id="dropZone"
+                         onclick="document.getElementById('fileInput').click();"
+                         ondragover="handleDragOver(event)"
+                         ondragleave="handleDragLeave(event)"
+                         ondrop="handleDrop(event)">
 
-					<p class="silver-text-subtext">@Model.Description</p>
+                        <!-- Instructions / description -->
+                        <p class="silver-text-subtext">@Model.Description</p>
 
-					@if (!string.IsNullOrEmpty(Model.UploadResult))
-					{
-						<p class="text-success mt-2">@Model.UploadResult</p>
+                        <!-- Display result after upload -->
+                        @if (!string.IsNullOrEmpty(Model.UploadResult))
+                        {
+                            <p class="text-success mt-2">@Model.UploadResult</p>
 
-						<!-- Image Preview from Azure Blob URL -->
-						<div class="mt-3 mb-3">
-							<img src="@Model.UploadedFileUrl"
-								alt="Uploaded Prescription"
-								class="img-fluid rounded shadow-sm"
-								style="max-width: 100%; max-height: 400px;" />
-						</div>
-					}
-					</div>
+                            <!-- Image preview of uploaded file -->
+                            <div class="mt-3 mb-3">
+                                <img src="@Model.UploadedFileUrl"
+                                     alt="Uploaded Prescription"
+                                     class="img-fluid rounded shadow-sm"
+                                     style="max-width: 100%; max-height: 400px;" />
+                            </div>
+                        }
+                    </div>
 
-				<!-- Hidden file input -->
-					<input type="file" name="uploadedFile" id="fileInput" class="hidden-file-input" onchange="document.getElementById('uploadForm').submit();" />
-				</form>
+                    <!-- Hidden file input triggered by clicking the container -->
+                    <input type="file" name="uploadedFile" id="fileInput" class="hidden-file-input" onchange="document.getElementById('uploadForm').submit();" />
+                </form>
+                <!-- Upload Form Ends -->
 
-                <!-- Upload Form ends -->
-
-                <!-- Buttons: Discard and Upload to Blob Storage -->
+                <!-- Action Buttons: Discard or Analyze -->
                 @if (!string.IsNullOrEmpty(Model.UploadResult))
                 {
                     <div class="btn-group">
+                        <!-- Discard uploaded file -->
                         <form method="post" asp-page-handler="Delete">
                             <input type="hidden" name="UploadedFileName" value="@Model.UploadedFileName" />
                             <button type="submit" class="btn btn-outline-danger">Discard</button>
                         </form>
-						
-						<form method="post" asp-page-handler="UploadToBlob">
+
+                        <!-- Upload file to Azure Blob for analysis -->
+                        <form method="post" asp-page-handler="UploadToBlob">
                             <input type="hidden" name="UploadedFileName" value="@Model.UploadedFileName" />
-							<input type="hidden" name="UploadedFileUrl" value="@Model.UploadedFileUrl" />
+                            <input type="hidden" name="UploadedFileUrl" value="@Model.UploadedFileUrl" />
                             <button type="submit" class="btn btn-outline-primary">Analyze</button>
-						</form>
+                        </form>
                     </div>
                 }
-
             </div>
         </div>
     </div>
@@ -158,23 +175,28 @@
     <script>
         const dropZone = document.getElementById('dropZone');
 
+        // Highlight drop zone on drag over
         function handleDragOver(e) {
             e.preventDefault();
             dropZone.style.background = 'rgba(255, 255, 255, 0.3)';
             dropZone.style.border = '2px dashed cyan';
         }
 
+        // Reset drop zone styling when dragging leaves
         function handleDragLeave(e) {
             dropZone.style.background = 'rgba(255, 255, 255, 0.2)';
             dropZone.style.border = '1px solid rgba(255, 255, 255, 0.3)';
         }
 
+        // Handle file drop into drop zone
         function handleDrop(e) {
             e.preventDefault();
 
+            // Reset styling
             dropZone.style.background = 'rgba(255, 255, 255, 0.2)';
             dropZone.style.border = '1px solid rgba(255, 255, 255, 0.3)';
 
+            // Assign dropped files to hidden input and submit the form
             const fileInput = document.getElementById('fileInput');
             const files = e.dataTransfer.files;
 

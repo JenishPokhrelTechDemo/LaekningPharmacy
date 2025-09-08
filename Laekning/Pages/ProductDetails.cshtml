@@ -1,10 +1,11 @@
-@page "/ProductDetails/{id:int}"
-@model ProductDetailsModel
+@page "/ProductDetails/{id:int}"          <!-- Route parameter: product ID as integer -->
+@model ProductDetailsModel                <!-- PageModel class for this page -->
 @{
-    ViewData["Title"] = "Product Details";
+    ViewData["Title"] = "Product Details"; <!-- Page title for layout/header -->
 }
 
 <style>
+    /* Glassy container styling for main content box */
     .glassy-container {
         background: rgba(255, 255, 255, 0.2) !important;
         backdrop-filter: blur(20px) brightness(1.3);
@@ -16,10 +17,11 @@
         box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
         color: #000 !important;
         max-width: 700px;
-        margin-left: auto;
+        margin-left: auto;  /* Center horizontally */
         margin-right: auto;
     }
 
+    /* Styling for the details table */
     .glassy-table {
         width: 100%;
         border-collapse: collapse;
@@ -40,6 +42,7 @@
         color: #000;
     }
 
+    /* Header for the page */
     .custom-header {
         text-align: center;
         font-size: 1.75rem;
@@ -50,35 +53,37 @@
         box-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
         color: #000;
     }
-	
-	.add-to-cart {
-    background: cyan;
-    border: none;
-    color: black;
-    padding: 10px 20px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: background 0.3s ease;
-	}
 
-	.add-to-cart:hover {
-		background: #00a3a3;
-	}
-	
-	.button-container {
-    display: flex;
-    justify-content: center; /* centers horizontally */
-    margin-top: 20px; /* spacing above button */
-	}
+    /* "Add to Cart" button styling */
+    .add-to-cart {
+        background: cyan;
+        border: none;
+        color: black;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: background 0.3s ease;
+    }
 
+    .add-to-cart:hover {
+        background: #00a3a3; /* Darker cyan on hover */
+    }
+
+    /* Container to center the button */
+    .button-container {
+        display: flex;
+        justify-content: center; /* centers horizontally */
+        margin-top: 20px; /* spacing above button */
+    }
 </style>
 
 <h3 class="custom-header">Product Details</h3>
 
-@if (Model.Product != null)
+@if (Model.Product != null)  <!-- Check if product exists -->
 {
     <div class="glassy-container">
+        <!-- Product details table -->
         <table class="glassy-table">
             <tbody>
                 <tr><th>ID</th><td>@Model.Product.ProductID</td></tr>
@@ -87,28 +92,29 @@
                 <tr><th>Category</th><td>@Model.Product.Category</td></tr>
                 <tr><th>Price</th><td>@Model.Product.Price.ToString("C")</td></tr>
                 <tr><th>Illustration</th>
-                    <td><img src="/images/@Model.Product.Image" alt="@Model.Product.Name" style="max-width:150px;" /></td>
+                    <td>
+                        <img src="/images/@Model.Product.Image" 
+                             alt="@Model.Product.Name" 
+                             style="max-width:150px;" /> <!-- Product image -->
+                    </td>
                 </tr>
             </tbody>
         </table>
-		
-		
+
         <!-- Add to Cart Form -->
         <div class="button-container">
-			<form asp-page="/Cart" method="post">
-				<input type="hidden" name="productId" value="@Model.Product.ProductID" />
-				<input type="hidden" name="returnUrl" value="@ViewContext.HttpContext.Request.PathAndQuery()" />
-				<button type="submit" class="add-to-cart">Add To Cart</button>
-			</form>
-		</div>
-
-
-
+            <form asp-page="/Cart" method="post">
+                <!-- Hidden inputs for product ID and return URL -->
+                <input type="hidden" name="productId" value="@Model.Product.ProductID" />
+                <input type="hidden" name="returnUrl" value="@ViewContext.HttpContext.Request.PathAndQuery()" />
+                <!-- Submit button -->
+                <button type="submit" class="add-to-cart">Add To Cart</button>
+            </form>
+        </div>
     </div>
-	
-
 }
 else
 {
+    <!-- Show message if product not found -->
     <p>Product not found.</p>
 }

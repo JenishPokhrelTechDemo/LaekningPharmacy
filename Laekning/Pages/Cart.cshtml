@@ -2,6 +2,7 @@
 @model CartModel
 
 <style>
+    /* Table styling with neon cyan glow and glass effect */
     .table {
 		background: linear-gradient(135deg, rgba(0, 255, 255, 0.3), rgba(0, 139, 139, 0.6));
 		backdrop-filter: blur(20px) brightness(1.3);
@@ -13,18 +14,20 @@
 		text-shadow: 0 0 8px rgba(0, 255, 255, 1);
 	}
 
+	/* Table cell styling */
 	.table th,
 	.table td {
 		background: rgba(0, 139, 139, 0.4);
 		border: 1px solid rgba(0, 255, 255, 0.4);
 	}
 
+	/* Bold headers with glowing text */
 	.table th {
 		font-weight: bold;
 		text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
 	}
 
-	/* Stronger Neon Glow for Buttons */
+	/* Primary & secondary buttons with neon glow */
 	.btn-primary, .btn-secondary {
 		background: rgba(0, 0, 0, 0.8);
 		border: 2px solid rgba(0, 255, 255, 0.8);
@@ -33,25 +36,27 @@
 		font-weight: bold;
 	}
 
+	/* Hover state for primary buttons (cyan glow) */
 	.btn-primary:hover {
 		background: rgba(0, 255, 255, 0.8);
 		box-shadow: 0 0 25px rgba(0, 255, 255, 1);
 		color: black;
 	}
 
-	/* Magenta Remove Button Glow */
+	/* Secondary button with magenta glow */
 	.btn-secondary {
 		border-color: rgba(255, 0, 255, 0.8);
 		box-shadow: 0 0 15px rgba(255, 0, 255, 1);
 	}
 
+	/* Hover state for secondary buttons */
 	.btn-secondary:hover {
 		background: rgba(255, 0, 255, 0.8);
 		box-shadow: 0 0 25px rgba(255, 0, 255, 1);
 		color: black;
 	}
 
-	/* Stronger Silver Glow Text */
+	/* Title text styling with metallic silver glow */
 	.silver-text {
 		font-family: "Copperplate Gothic Bold", "Gloock", serif;
 		font-weight: bold;
@@ -65,36 +70,33 @@
 		text-transform: uppercase;
 	}
 	
+	/* Container for product images inside table */
 	.product-img {
-	width: 140px;
-	height: 140px;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	background: white;
-	padding: 5px;
-	border-radius: 8px;
-	overflow: hidden;
-	margin: auto; /* centers the cell content */
+		width: 140px;
+		height: 140px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: white;
+		padding: 5px;
+		border-radius: 8px;
+		overflow: hidden;
+		margin: auto; /* centers the cell content */
 	}
 
+	/* Image scaling inside product cell */
 	.product-img img {
 		max-width: 100%;
 		max-height: 100%;
 		object-fit: contain;
 		display: block;
-	}	
-
-
-
-
-}
-
+	}
 </style>
 
-
-
+<!-- Cart Title -->
 <h2 class="silver-text">Your cart</h2>
+
+<!-- Cart table -->
 <table class="table table-bordered table-striped">
     <thead>
         <tr>
@@ -109,18 +111,33 @@
         @foreach (var line in Model.Cart?.Lines 
                     ?? Enumerable.Empty<CartLine>()) {
             <tr>
+                <!-- Quantity -->
                 <td class="text-center">@line.Quantity</td>
+
+                <!-- Product name -->
                 <td class="text-left">@line.Product.Name</td>
-				<td><div class="product-img"><img src="~/images/@line.Product.Image" alt="@line.Product.Name" /></div></td>
+
+                <!-- Product image -->
+				<td>
+                    <div class="product-img">
+                        <img src="~/images/@line.Product.Image" alt="@line.Product.Name" />
+                    </div>
+                </td>
+
+                <!-- Price -->
                 <td class="text-right">
                     @line.Product.Price.ToString("c")
                 </td>
+
+                <!-- Subtotal for this line -->
                 <td class="text-right">
                     @((line.Quantity * line.Product.Price).ToString("c"))
                 </td>
 				
+				<!-- Remove button form -->
 				<td class="text-center">
 					<form asp-page-handler="Remove" method="post">
+						<!-- Hidden inputs to send product & return info -->
 						<input type="hidden" name="ProductID"
 							value="@line.Product.ProductID" />
 						<input type="hidden" name="returnUrl"
@@ -134,6 +151,8 @@
             </tr>
         }
     </tbody>
+
+    <!-- Cart total -->
     <tfoot>
         <tr>
             <td colspan="3" class="text-right">Total:</td>
@@ -144,10 +163,14 @@
     </tfoot>
 </table>
 
+<!-- Action buttons below cart -->
 <div class="text-center">
+    <!-- Return to shopping -->
     <a class="btn btn-primary" href="@Model.ReturnUrl">
         Continue shopping
     </a>
+
+    <!-- Proceed to checkout -->
 	<a class="btn btn-primary" asp-action="Checkout" asp-controller="Order">
         Checkout
     </a>

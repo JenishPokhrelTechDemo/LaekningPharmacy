@@ -1,59 +1,65 @@
 ﻿<!DOCTYPE html>
 <html>
 <head>
-    <meta name="viewport" content="width=device-width" />
+    <meta name="viewport" content="width=device-width" /> <!-- Ensure responsiveness on mobile devices -->
     <title>Laekning</title>
+    <!-- Bootstrap CSS -->
     <link href="/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+    <!-- Font Awesome for icons -->
     <link href="/lib/font-awesome/css/all.min.css" rel="stylesheet" />
+    
     <style>
-        /* Azure navbar */
+        /* Navbar with Azure background */
         .navbar-custom {
-            background-color: #F0FFFF;
+            background-color: #F0FFFF; /* Light azure background */
             padding: 10px 20px;
         }
 
-        /* Logo */
+        /* Logo styling */
         .navbar-brand img {
             height: 45px;
             max-width: 265px;
         }
 
-        /* Navigation links */
+        /* Navigation links styling */
         .nav-link {
             color: #333;
             font-weight: 500;
         }
 
         .nav-link:hover {
-            color: 	#7DF9FF; /* Electric Blue */
+            color: #7DF9FF; /* Electric blue on hover */
         }
 
-        /* Search Bar */
+        /* Search bar container styling */
         .search-bar {
             display: flex;
             align-items: center;
             gap: 10px;
         }
 
+        /* Search input box styling */
         .search-input {
             border: 1px solid #ccc;
             border-radius: 5px;
             padding: 5px;
         }
 
-        /* Align icons */
+        /* Icons container in navbar */
         .navbar-icons {
             display: flex;
             align-items: center;
             gap: 15px;
         }
 
+        /* Navbar icons links */
         .navbar-icons a {
             color: #44D1C0;
             text-decoration: none;
             font-weight: 500;
         }
 
+        /* Shopping cart icon styling */
         .cart-icon {
             background: #333;
             color: white;
@@ -62,11 +68,13 @@
         }
     </style>
 </head>
+
 <body>
 
 <!-- Navbar (Azure Background) -->
 <nav class="navbar navbar-expand-lg navbar-light navbar-custom">
     <div class="container-fluid d-flex justify-content-between align-items-center">
+
         <!-- Left Section: Logo -->
         <a class="navbar-brand" href="/Page1">
             <img src="/images/logo-removebg-preview.png" alt="Laekning Logo">
@@ -75,55 +83,62 @@
         <!-- Center Section: Navigation Links -->
         <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
             <ul class="navbar-nav">
+                <!-- Products dropdown menu -->
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="productsDropdown" role="button"
                        data-bs-toggle="dropdown" aria-expanded="false">
                         Products
                     </a>
-                    @await Component.InvokeAsync("NavigationMenu")
+                    @await Component.InvokeAsync("NavigationMenu") <!-- Render dynamic categories from component -->
                 </li>
+                <!-- Support link -->
                 <li class="nav-item"><a class="nav-link" href="/Support">Support</a></li>
+                
+                <!-- Features dropdown menu -->
                 <li class="nav-item dropdown">
-					<a class="nav-link dropdown-toggle" href="#" id="featuresDropdown" role="button"
-						data-bs-toggle="dropdown" aria-expanded="false">
-						Features
-					</a>
-					<div class="dropdown-menu" aria-labelledby="featureDropdown">
-					
-						<a class="dropdown-item" href="/Prescription_OCR" >Prescription Drug Identifier</a>
-						<a class="dropdown-item" href="/HealthAssistant" >Health Assistant</a>
-					</div>
-				</li>
-
+                    <a class="nav-link dropdown-toggle" href="#" id="featuresDropdown" role="button"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                        Features
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="featureDropdown">
+                        <a class="dropdown-item" href="/Prescription_OCR">Prescription Drug Identifier</a>
+                        <a class="dropdown-item" href="/HealthAssistant">Health Assistant</a>
+                    </div>
+                </li>
             </ul>
         </div>
 
         <!-- Right Section: Icons & Search -->
         <div class="navbar-icons">
+            <!-- Admin/User profile icon -->
             <a href="/admin"><i class="fas fa-user"></i></a>
+
+            <!-- Search form -->
             <form method="get" asp-page="/SearchResults" class="search-bar">
-				<input type="text" name="ExtractedInscription" class="search-input" placeholder="Search Laekning"/>
-					<button type="submit" class="btn btn-outline-info">
-						<i class="fas fa-search"></i>
-					</button>
-			</form>
-            <a asp-page="/Cart" asp-route-returnUrl="@Context.Request.Path" class="cart-icon"><i class="fas fa-shopping-cart"></i></a>
+                <input type="text" name="ExtractedInscription" class="search-input" placeholder="Search Laekning"/>
+                <button type="submit" class="btn btn-outline-info">
+                    <i class="fas fa-search"></i>
+                </button>
+            </form>
+
+            <!-- Shopping cart link -->
+            <a asp-page="/Cart" asp-route-returnUrl="@Context.Request.Path" class="cart-icon">
+                <i class="fas fa-shopping-cart"></i>
+            </a>
         </div>
+
     </div>
 </nav>
 
-<!-- Main Content -->
+<!-- Main Content Area -->
 <div class="row m-1 p-0">
-    
     <div class="col-9">
-        @RenderBody()
+        @RenderBody() <!-- Render the content of the child view/page -->
     </div>
 </div>
 
-<!-- Bootstrap Script -->
+<!-- Bootstrap JS Bundle (includes Popper) -->
 <script src="/lib/bootstrap/js/bootstrap.bundle.min.js"></script>
 
 </body>
 </html>
-
-

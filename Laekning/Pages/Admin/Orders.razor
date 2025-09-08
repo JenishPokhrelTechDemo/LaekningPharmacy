@@ -1,7 +1,8 @@
-﻿@page "/admin/orders"
-@inherits OwningComponentBase<IOrderRepository>
+﻿@page "/admin/orders"                             // Route for this Blazor page: "/admin/orders"
+@inherits OwningComponentBase<IOrderRepository>   // Inherit from OwningComponentBase to get an injected IOrderRepository service
 
 <style>
+    /* Glassy container styling for order sections */
     .container {
         background: rgba(255, 255, 255, 0.2) !important;
         backdrop-filter: blur(20px) brightness(1.3);
@@ -17,65 +18,81 @@
         margin-right: auto;
     }
 	
+    /* Custom button with neon glow effect */
 	.custom-btn {
-			background: rgba(0, 0, 0, 0.6); /* same as navbar */
-			border: 1px solid rgba(0, 255, 255, 0.6);
-			color: white;
-			font-weight: bold;
-			backdrop-filter: blur(4px);
-			text-shadow: 2px 2px 5px rgba(255, 255, 255, 0.5);
-			transition: all 0.3s ease;
+        background: rgba(0, 0, 0, 0.6); /* dark background (matches navbar) */
+        border: 1px solid rgba(0, 255, 255, 0.6);
+        color: white;
+        font-weight: bold;
+        backdrop-filter: blur(4px);
+        text-shadow: 2px 2px 5px rgba(255, 255, 255, 0.5);
+        transition: all 0.3s ease;
 	}
 	
 	.custom-btn:hover {
-			
-			box-shadow: 0 0 15px rgba(0, 255, 255, 0.8);
+        /* Glow effect on hover */
+        box-shadow: 0 0 15px rgba(0, 255, 255, 0.8);
 	}
-	
-
 </style>
 
 <div class="container">
 
-<OrderTable TableTitle="Unshipped Orders" Orders="UnshippedOrders" 
-            ButtonLabel="Ship" OrderSelected="ShipOrder" />
-<OrderTable TableTitle="Shipped Orders" Orders="ShippedOrders" 
-            ButtonLabel="Reset" OrderSelected="ResetOrder" />
-<button class="btn custom-btn" @onclick="@(e => UpdateData())">
-    Refresh Data
-</button>
+    <!-- Order table for unshipped orders -->
+    <OrderTable TableTitle="Unshipped Orders" Orders="UnshippedOrders" 
+                ButtonLabel="Ship" OrderSelected="ShipOrder" />
+
+    <!-- Order table for shipped orders -->
+    <OrderTable TableTitle="Shipped Orders" Orders="ShippedOrders" 
+                ButtonLabel="Reset" OrderSelected="ResetOrder" />
+
+    <!-- Refresh button to reload data from repository -->
+    <button class="btn custom-btn" @onclick="@(e => UpdateData())">
+        Refresh Data
+    </button>
 
 </div>
 
 @code {
 
+    // Shortcut property to access the injected IOrderRepository service
     public IOrderRepository Repository => Service;
 
+    // Holds all orders
     public IEnumerable<Order> AllOrders { get; set; } 
         = Enumerable.Empty<Order>();
+
+    // Holds unshipped orders (Shipped == false)
     public IEnumerable<Order> UnshippedOrders { get; set; }
         = Enumerable.Empty<Order>();
+
+    // Holds shipped orders (Shipped == true)
     public IEnumerable<Order> ShippedOrders { get; set; }
         = Enumerable.Empty<Order>();
 
+    // Lifecycle method: fetch data when component is initialized
     protected async override Task OnInitializedAsync() {
         await UpdateData();
     }
 
+    // Refresh all orders and separate into shipped/unshipped groups
     public async Task UpdateData() {
         AllOrders = await Repository.Orders.ToListAsync();
         UnshippedOrders = AllOrders.Where(o => !o.Shipped);
         ShippedOrders = AllOrders.Where(o => o.Shipped);
     }
 
+    // Mark an order as shipped
     public void ShipOrder(int id) => UpdateOrder(id, true);
+
+    // Reset shipped order back to unshipped
     public void ResetOrder(int id) => UpdateOrder(id, false);
 
+    // Update the order's shipped status in repository
     private void UpdateOrder(int id, bool shipValue) {
         Order? o = Repository.Orders.FirstOrDefault(o => o.OrderID == id);
         if (o != null) {
             o.Shipped = shipValue;
-            Repository.SaveOrder(o);
+            Repository.SaveOrder(o);  // Persist changes
         }
     }
 }

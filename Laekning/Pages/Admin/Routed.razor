@@ -1,9 +1,25 @@
 ﻿<Router AppAssembly="typeof(Program).Assembly">
+    <!-- 
+        Router component: Handles navigation in the Blazor app.
+        It looks at the requested URL and decides which component/page to display.
+        "AppAssembly" tells the router where to look for routable components.
+    -->
+
     <Found>
+        <!-- 
+            This section renders when a matching route is found.
+            RouteView displays the component for the matched route.
+            DefaultLayout specifies that pages should use the AdminLayout by default.
+        -->
         <RouteView RouteData="@context" 
-            DefaultLayout="typeof(AdminLayout)" />
+                   DefaultLayout="typeof(AdminLayout)" />
     </Found>
+
     <NotFound>
+        <!-- 
+            This section renders when no route matches the requested URL.
+            A simple error message is shown inside a styled Bootstrap alert.
+        -->
         <h4 class="bg-danger text-white text-center p-2">
             No Matching Route Found
         </h4>

@@ -3,57 +3,65 @@
 <head>
     <meta name="viewport" content="width=device-width" />
     <title>Laekning</title>
+
+    <!-- Bootstrap for responsive styling -->
     <link href="/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
-	<link href="/lib/font-awesome/css/all.min.css" rel="stylesheet" />
-	 <style>
-         /* Azure navbar */
+
+    <!-- Font Awesome for icons -->
+    <link href="/lib/font-awesome/css/all.min.css" rel="stylesheet" />
+
+    <style>
+        /* Custom styling for the navbar with Azure-like background */
         .navbar-custom {
             background-color: #F0FFFF;
             padding: 10px 20px;
         }
 
-        /* Logo */
+        /* Logo styling inside the navbar */
         .navbar-brand img {
             height: 45px;
             max-width: 265px;
         }
 
-        /* Navigation links */
+        /* Navigation link styling */
         .nav-link {
             color: #333;
             font-weight: 500;
         }
 
         .nav-link:hover {
-            color: 	#7DF9FF; /* Electric Blue */
+            color: #7DF9FF; /* Electric Blue hover effect */
         }
 
-        /* Search Bar */
+        /* Search bar layout */
         .search-bar {
             display: flex;
             align-items: center;
             gap: 10px;
         }
 
+        /* Input box inside search bar */
         .search-input {
             border: 1px solid #ccc;
             border-radius: 5px;
             padding: 5px;
         }
 
-        /* Align icons */
+        /* Align icons section (right side of navbar) */
         .navbar-icons {
             display: flex;
             align-items: center;
             gap: 15px;
         }
 
+        /* Styling for links in the icon section */
         .navbar-icons a {
             color: #44D1C0;
             text-decoration: none;
             font-weight: 500;
         }
 
+        /* Cart icon special style (dark background with white text) */
         .cart-icon {
             background: #333;
             color: white;
@@ -64,10 +72,11 @@
 </head>
 <body>
 
-<!-- Navbar (Azure Background) -->
+<!-- Navbar Section -->
 <nav class="navbar navbar-expand-lg navbar-light navbar-custom">
     <div class="container-fluid d-flex justify-content-between align-items-center">
-        <!-- Left Section: Logo -->
+
+        <!-- Left Section: Logo (links to Page1) -->
         <a class="navbar-brand" href="/Page1">
             <img src="/images/logo-removebg-preview.png" alt="Laekning Logo">
         </a>
@@ -75,6 +84,8 @@
         <!-- Center Section: Navigation Links -->
         <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
             <ul class="navbar-nav">
+
+                <!-- Products dropdown menu populated by a ViewComponent -->
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="productsDropdown" role="button"
                        data-bs-toggle="dropdown" aria-expanded="false">
@@ -82,62 +93,73 @@
                     </a>
                     @await Component.InvokeAsync("NavigationMenu")
                 </li>
-                <li class="nav-item"><a class="nav-link" href="/Support">Support</a></li>
+
+                <!-- Support page link -->
+                <li class="nav-item">
+                    <a class="nav-link" href="/Support">Support</a>
+                </li>
+
+                <!-- Features dropdown with hardcoded feature links -->
                 <li class="nav-item dropdown">
 					<a class="nav-link dropdown-toggle" href="#" id="featuresDropdown" role="button"
 						data-bs-toggle="dropdown" aria-expanded="false">
 						Features
 					</a>
 					<div class="dropdown-menu" aria-labelledby="featureDropdown">
-					
-						<a class="dropdown-item" href="/Prescription_OCR" >Prescription Drug Identifier</a>
-						<a class="dropdown-item" href="/HealthAssistant" >Health Assistant</a>
+						<a class="dropdown-item" href="/Prescription_OCR">Prescription Drug Identifier</a>
+						<a class="dropdown-item" href="/HealthAssistant">Health Assistant</a>
 					</div>
 				</li>
-
             </ul>
         </div>
 
-        <!-- Right Section: Icons & Search -->
+        <!-- Right Section: User/Admin, Search, Cart -->
         <div class="navbar-icons">
+            <!-- Admin/User icon -->
             <a href="/admin"><i class="fas fa-user"></i></a>
+
+            <!-- Search bar (submits to SearchResults page) -->
             <form method="get" asp-page="/SearchResults" class="search-bar">
 				<input type="text" name="ExtractedInscription" class="search-input" placeholder="Search Laekning"/>
-					<button type="submit" class="btn btn-outline-info">
-						<i class="fas fa-search"></i>
-					</button>
+				<button type="submit" class="btn btn-outline-info">
+					<i class="fas fa-search"></i>
+				</button>
 			</form>
-            <a asp-page="/Cart" asp-route-returnUrl="@Context.Request.Path" class="cart-icon"><i class="fas fa-shopping-cart"></i></a>
+
+            <!-- Shopping cart link -->
+            <a asp-page="/Cart" asp-route-returnUrl="@Context.Request.Path" class="cart-icon">
+                <i class="fas fa-shopping-cart"></i>
+            </a>
         </div>
     </div>
 </nav>
 
-
-    <div class="m-1 p-1">
-       @RenderBody() 
-    </div>
+<!-- Main content placeholder -->
+<div class="m-1 p-1">
+   @RenderBody() 
+</div>
 	
-	<style>
-	body {
-    background-image: url('/images/molecular-illustration.jpg'); /* Ensure correct path */
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
-}
+<style>
+    /* Background image applied to entire page */
+    body {
+        background-image: url('/images/molecular-illustration.jpg'); /* Make sure path is correct */
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+    }
 
-/* Ensure content remains readable */
-.product-container {
-    background: rgba(255, 255, 255, 0.9); /* Slight transparency for readability */
-    border-radius: 10px;
-    padding: 20px;
-    width: 90%;
-    max-width: 1200px;
-    margin: 20px auto;
-}
-	</style>
+    /* Container styling for product-related content */
+    .product-container {
+        background: rgba(255, 255, 255, 0.9); /* Transparent white for readability */
+        border-radius: 10px;
+        padding: 20px;
+        width: 90%;
+        max-width: 1200px;
+        margin: 20px auto;
+    }
+</style>
 
-	
-<!-- Bootstrap Script -->
+<!-- Bootstrap script for dropdowns, navbar toggle, etc. -->
 <script src="/lib/bootstrap/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

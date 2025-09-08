@@ -1,91 +1,106 @@
 ﻿@model Product
 
 <style>
-    /* Each product card */
-.product-card {
-    background: rgba(0, 0, 0, 0.6);
-    border-radius: 10px;
-    padding: 20px;
-    color: white;
-    width: 280px;
-    min-height: 420px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between; /* pushes content to top & bottom */
-    box-shadow: 0 4px 10px rgba(0, 255, 255, 0.3);
-    backdrop-filter: blur(8px);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    text-align: center;
-}
+    /* Container for each product card */
+    .product-card {
+        background: rgba(0, 0, 0, 0.6); /* Semi-transparent dark background */
+        border-radius: 10px; /* Rounded corners */
+        padding: 20px;
+        color: white;
+        width: 280px; /* Fixed width for uniform cards */
+        min-height: 420px; /* Ensure enough height for all content */
+        display: flex;
+        flex-direction: column; /* Stack content vertically */
+        justify-content: space-between; /* Push top content and bottom button apart */
+        box-shadow: 0 4px 10px rgba(0, 255, 255, 0.3); /* Soft cyan glow */
+        backdrop-filter: blur(8px); /* Frosted glass effect */
+        transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth hover animation */
+        text-align: center;
+    }
 
-.product-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 6px 15px rgba(0, 255, 255, 0.6);
-}
+    /* Hover effect for card lift and stronger shadow */
+    .product-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 15px rgba(0, 255, 255, 0.6);
+    }
 
-.product-card img {
-         width: 100%;
-        height: 180px;
-        object-fit: contain;
-        border-radius: 8px;
+    /* Product image styling */
+    .product-card img {
+        width: 100%; /* Full width inside card */
+        height: 180px; /* Fixed height for consistency */
+        object-fit: contain; /* Scale image without cropping */
+        border-radius: 8px; /* Rounded edges */
         margin-bottom: 15px;
-        background: white;
+        background: white; /* Ensure contrast behind product image */
         padding: 5px;
+    }
 
-}
+    /* Product title styling */
+    .product-title {
+        font-size: 1.2em;
+        font-weight: bold;
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
 
-.product-title {
-    font-size: 1.2em;
-    font-weight: bold;
-    margin-top: 10px;
-    margin-bottom: 10px;
-}
+    /* Price badge styling */
+    .price-badge {
+        background: cyan;
+        color: black;
+        padding: 5px 10px;
+        border-radius: 15px;
+        font-weight: bold;
+        font-size: 1em;
+        display: inline-block;
+        margin-bottom: 10px;
+    }
 
-.price-badge {
-    background: cyan;
-    color: black;
-    padding: 5px 10px;
-    border-radius: 15px;
-    font-weight: bold;
-    font-size: 1em;
-    display: inline-block;
-    margin-bottom: 10px;
-}
+    /* Product description styling */
+    .product-desc {
+        font-size: 0.9em;
+        margin-bottom: 20px; /* Space between description and button */
+        flex-grow: 1; /* Push the Add to Cart button to the bottom of the card */
+    }
 
-.product-desc {
-    font-size: 0.9em;
-    margin-bottom: 20px; /* Space between desc and button */
-    flex-grow: 1; /* Pushes button to bottom */
-}
+    /* Add to Cart button styling */
+    .add-to-cart {
+        background: cyan;
+        border: none;
+        color: black;
+        padding: 10px 15px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: background 0.3s ease;
+    }
 
-.add-to-cart {
-    background: cyan;
-    border: none;
-    color: black;
-    padding: 10px 15px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: background 0.3s ease;
-}
-
-.add-to-cart:hover {
-    background: #00a3a3;
-}
-
+    /* Hover effect for button */
+    .add-to-cart:hover {
+        background: #00a3a3; /* Slightly darker cyan on hover */
+    }
 </style>
 
+<!-- Product Card -->
 <div class="product-card">
+    <!-- Product image -->
     <img src="~/images/@Model.Image" alt="@Model.Name" />
 
+    <!-- Product title -->
     <h4 class="product-title">@Model.Name</h4>
+
+    <!-- Product price badge -->
     <span class="price-badge">@Model.Price.ToString("c")</span>
 
+    <!-- Product description -->
     <p class="product-desc">@Model.Description</p>
 
+    <!-- Add to Cart form -->
     <form id="@Model.ProductID" asp-page="/Cart" method="post">
+        <!-- Hidden input to send ProductID to server -->
         <input type="hidden" asp-for="ProductID" />
+        <!-- Return URL so user can return to the same page after adding -->
         <input type="hidden" name="returnUrl" value="@ViewContext.HttpContext.Request.PathAndQuery()" />
+        <!-- Submit button -->
         <button type="submit" class="add-to-cart">Add To Cart</button>
     </form>
 </div>

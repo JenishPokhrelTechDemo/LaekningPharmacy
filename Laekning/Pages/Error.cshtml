@@ -1,19 +1,25 @@
-@page "/error"
+@page "/error"  <!-- Defines the route for this page: /error -->
 @{
-	Layout = "null";
+    Layout = "null";  // Disables any layout; this page is standalone
 }
 
 <!DOCTYPE html>
 <html>
 <head>
-	<meta name="viewport" content="width=device-width">
-	<link href="/lib/bootstrap/css/bootstrap.min.css" />
-	<title>Error</title>
+    <meta name="viewport" content="width=device-width"> <!-- Makes page responsive -->
+    
+    <!-- Link to Bootstrap CSS for styling -->
+    <link href="/lib/bootstrap/css/bootstrap.min.css" />
+    
+    <title>Error</title> <!-- Page title shown in browser tab -->
 </head>
 <body class="text-center">
-	<h2 class="text-danger">Error.</h2>
-	<h3 class="text-danger">
-		An error occurred while processing your request
-	</h3>
+    <!-- Main error heading -->
+    <h2 class="text-danger">Error.</h2>
+
+    <!-- Subheading describing that an error occurred -->
+    <h3 class="text-danger">
+        An error occurred while processing your request
+    </h3>
 </body>
 </html>

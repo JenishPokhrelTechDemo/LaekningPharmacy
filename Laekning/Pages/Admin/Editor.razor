@@ -1,5 +1,5 @@
-﻿@page "/admin/products/edit/{id:long}"
-@page "/admin/products/create"
+﻿@page "/admin/products/edit/{id:long}"    // Route for editing an existing product
+@page "/admin/products/create"            // Route for creating a new product
 @inherits OwningComponentBase<IStoreRepository>
 @using Microsoft.AspNetCore.Components.Forms
 @using Azure.Identity
@@ -8,60 +8,66 @@
 @using Azure.Storage.Blobs.Specialized
 @inject IWebHostEnvironment Env
 
+<!-- CSS styling for the form and elements -->
 <style>
+    /* Validation message color */
     div.validation-message { color: rgb(220, 53, 69); font-weight: 500 }
-	
-	.white-glow-text {
-		
-		font-weight: bold;
-		font-style: italic;
-		background: linear-gradient(135deg, #ffffff, #ffffff, #fefefe, #ffffff);
-		-webkit-background-clip: text;
-		-webkit-text-fill-color: transparent;
-		text-shadow: 3px 3px 8px rgba(255, 255, 255, 1),
-					-3px -3px 8px rgba(255, 255, 255, 0.8),
-					0 0 10px rgba(255, 255, 255, 0.9);
-		letter-spacing: 2px;
-		text-transform: uppercase;
-	}
-	
-	.product-container {
-    background: rgba(0, 0, 0, 0.8); /* Stronger dark overlay */
-    padding: 25px;
-    border-radius: 10px;
-    max-width: 600px;
-    margin: auto;
-    box-shadow: 0 0 15px rgba(0, 255, 255, 0.6); /* Glow effect */
-	}
-	
-	.hidden-file-input {
-    opacity: 0;
-    position: absolute;
-    left: -9999px;
-	}
-	
-	.section-label {
-    color: #0ff;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-	}
-	
-	/* Amber Edit Button Glow */
-	.bg-warning {
-		background: rgba(255, 191, 0, 0.8); 
-		border-color: rgba(255, 191, 0, 0.8); 
-		box-shadow: 0 0 15px rgba(255, 191, 0, 1); 
-	}
-	
-	/* Cyan Details Button Glow */
-	.bg-primary {
-		background: rgba(0, 255, 255, 0.8);
-		border-color: rgba(0, 255, 255, 0.8);
-		box-shadow: 0 0 15px rgba(0, 255, 255, 1);
-	}
-	
-	.custom-header {
+
+    /* White glowing text style */
+    .white-glow-text {
+        font-weight: bold;
+        font-style: italic;
+        background: linear-gradient(135deg, #ffffff, #ffffff, #fefefe, #ffffff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-shadow: 3px 3px 8px rgba(255, 255, 255, 1),
+                    -3px -3px 8px rgba(255, 255, 255, 0.8),
+                    0 0 10px rgba(255, 255, 255, 0.9);
+        letter-spacing: 2px;
+        text-transform: uppercase;
+    }
+
+    /* Container for the product form */
+    .product-container {
+        background: rgba(0, 0, 0, 0.8); 
+        padding: 25px;
+        border-radius: 10px;
+        max-width: 600px;
+        margin: auto;
+        box-shadow: 0 0 15px rgba(0, 255, 255, 0.6);
+    }
+
+    /* Hide the actual file input for styling purposes */
+    .hidden-file-input {
+        opacity: 0;
+        position: absolute;
+        left: -9999px;
+    }
+
+    /* Labels for sections */
+    .section-label {
+        color: #0ff;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    /* Glow for edit button */
+    .bg-warning {
+        background: rgba(255, 191, 0, 0.8); 
+        border-color: rgba(255, 191, 0, 0.8); 
+        box-shadow: 0 0 15px rgba(255, 191, 0, 1); 
+    }
+
+    /* Glow for primary button */
+    .bg-primary {
+        background: rgba(0, 255, 255, 0.8);
+        border-color: rgba(0, 255, 255, 0.8);
+        box-shadow: 0 0 15px rgba(0, 255, 255, 1);
+    }
+
+    /* Header for the page */
+    .custom-header {
         text-align: center;
         font-size: 1.75rem;
         margin-bottom: 1rem;
@@ -71,17 +77,18 @@
         box-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
         color: #000;
     }
-
-	
 </style>
 
+<!-- Page header showing "Create" or "Edit" -->
 <h3 class="custom-header">
     @TitleText a Product
 </h3>
 
+<!-- Product form using EditForm with data validation -->
 <EditForm Model="Product" OnValidSubmit="SaveProduct" class="product-container">
     <DataAnnotationsValidator />
 
+    <!-- Show Product ID only if editing an existing product -->
     @if (Product.ProductID.HasValue && Product.ProductID.Value != 0)
     {
         <div class="form-group">
@@ -90,54 +97,56 @@
         </div>
     }
 
+    <!-- Product Name field -->
     <div class="form-group">
         <label class="white-glow-text">Name</label>
         <ValidationMessage For="@(() => Product.Name)" />
         <InputText class="form-control" @bind-Value="Product.Name" />
     </div>
 
+    <!-- Product Description field -->
     <div class="form-group">
         <label class="white-glow-text">Description</label>
         <ValidationMessage For="@(() => Product.Description)" />
         <InputText class="form-control" @bind-Value="Product.Description" />
     </div>
 
+    <!-- Product Category field -->
     <div class="form-group">
         <label class="white-glow-text">Category</label>
         <ValidationMessage For="@(() => Product.Category)" />
         <InputText class="form-control" @bind-Value="Product.Category" />
     </div>
 
+    <!-- Product Price field -->
     <div class="form-group">
         <label class="white-glow-text">Price</label>
         <ValidationMessage For="@(() => Product.Price)" />
         <InputNumber class="form-control" @bind-Value="Product.Price" />
     </div>
 
-    <!-- Image Filename (optional) -->
+    <!-- Optional image filename -->
     <div class="form-group">
         <label class="white-glow-text">Image Filename</label>
         <InputText class="form-control" @bind-Value="Product.Image" />
     </div>
 
-    <!-- Image Upload -->
+    <!-- Image upload section -->
     <div class="form-group mt-3">
-    <label class="white-glow-text section-label" >Upload New Image</label>
-     <!-- custom-file-upload class added here just in case any future changes are needed to be made. -->
-	<div class="custom-file-upload">
-        <label class="btn btn-outline-info">
-            Choose File
-            <InputFile OnChange="HandleImageUpload" class="hidden-file-input" />
-        </label>
-        @if (uploadedFile != null)
-        {
-            <p class="text-success mt-1">Uploaded: @uploadedFile.Name</p>
-        }
+        <label class="white-glow-text section-label" >Upload New Image</label>
+        <div class="custom-file-upload">
+            <label class="btn btn-outline-info">
+                Choose File
+                <InputFile OnChange="HandleImageUpload" class="hidden-file-input" />
+            </label>
+            @if (uploadedFile != null)
+            {
+                <p class="text-success mt-1">Uploaded: @uploadedFile.Name</p>
+            }
+        </div>
     </div>
-</div>
 
-
-    <!-- Preview -->
+    <!-- Preview the uploaded image -->
     @if (!string.IsNullOrEmpty(Product.Image))
     {
         <div class="mb-3">
@@ -148,6 +157,7 @@
         </div>
     }
 
+    <!-- Save and Cancel buttons -->
     <div class="mt-2">
         <button type="submit" class="btn btn-@ThemeColor">Save</button>
         <NavLink class="btn btn-secondary" href="/admin/products">Cancel</NavLink>
@@ -155,29 +165,32 @@
 </EditForm>
 
 @code {
+    // Repository service for CRUD operations
     public IStoreRepository Repository => Service;
 
+    // Navigation manager for redirecting
     [Inject]
     public NavigationManager? NavManager { get; set; }
 
+    // Product ID passed as a parameter (0 if creating new)
     [Parameter]
     public long Id { get; set; } = 0;
 
+    // The product being created/edited
     public Product Product { get; set; } = new Product();
 
+    // Uploaded file info
     private IBrowserFile? uploadedFile;
-	
-	private string BlobUri; 
-	private string ImageContainerName; 
-	
-    public string UploadedFileName { get; set; }
-		
+    private string BlobUri; 
+    private string ImageContainerName; 
+    public string UploadedFileName { get; set; }		
 	public string UploadedFileUrl {get; set;}
-	
+
+    // Configuration service
 	[Inject]
 	public IConfiguration Config { get; set; } = default!;
 
-
+    // Load existing product if editing
     protected override void OnParametersSet()
     {
         if (Id != 0)
@@ -186,51 +199,50 @@
         }
     }
 	
-	// Initialize secrets from Key Vault
+    // Initialize Azure Key Vault secrets (Blob storage info)
     private async Task InitializeSecretsAsync()
     {
-            if (!string.IsNullOrEmpty(BlobUri) && !string.IsNullOrEmpty(ImageContainerName))
-				return; // already initialized
+        if (!string.IsNullOrEmpty(BlobUri) && !string.IsNullOrEmpty(ImageContainerName))
+            return; // already initialized
 
-            string vaultUri = Config["AzureKeyVault:KeyVaultUrl"];
-            var client = new SecretClient(new Uri(vaultUri), new DefaultAzureCredential());
+        string vaultUri = Config["AzureKeyVault:KeyVaultUrl"];
+        var client = new SecretClient(new Uri(vaultUri), new DefaultAzureCredential());
 			
-			KeyVaultSecret secretBlobUri = await client.GetSecretAsync("BlobUri");
-			KeyVaultSecret secretImageContainerName = await client.GetSecretAsync("ImageContainerName");
+        KeyVaultSecret secretBlobUri = await client.GetSecretAsync("BlobUri");
+        KeyVaultSecret secretImageContainerName = await client.GetSecretAsync("ImageContainerName");
 			
-            BlobUri = secretBlobUri.Value; 
-            ImageContainerName = secretImageContainerName.Value;
+        BlobUri = secretBlobUri.Value; 
+        ImageContainerName = secretImageContainerName.Value;
     }
 
+    // Handle image upload to Azure Blob Storage
     private async Task HandleImageUpload(InputFileChangeEventArgs e)
     {
-		await InitializeSecretsAsync();
+        await InitializeSecretsAsync();
 		
-		uploadedFile = e.File;
-		
-		string imageContainerName = ImageContainerName;
-		string blobName = uploadedFile.Name;
+        uploadedFile = e.File;
+        string blobName = uploadedFile.Name;
 
-		// Create the container client (connection string should be in config or KeyVault)
-		var blobServiceClient = new BlobServiceClient(new Uri(BlobUri));
+        // Create blob container client
+        var blobServiceClient = new BlobServiceClient(new Uri(BlobUri));
         var ImageContainerClient = blobServiceClient.GetBlobContainerClient(ImageContainerName);
         await ImageContainerClient.CreateIfNotExistsAsync();
 
-		// Get a reference to the blob
-		var blobClient = ImageContainerClient.GetBlobClient(blobName);
+        // Upload file
+        var blobClient = ImageContainerClient.GetBlobClient(blobName);
+        using (var stream = uploadedFile.OpenReadStream())
+        {
+            await blobClient.UploadAsync(stream, overwrite: true);
+        }
 
-		// Upload the file stream
-		using (var stream = uploadedFile.OpenReadStream())
-		{
-			await blobClient.UploadAsync(stream, overwrite: true);
-		}
-
-		UploadedFileName = blobName;
-		UploadedFileUrl = blobClient.Uri.ToString(); 
+        UploadedFileName = blobName;
+        UploadedFileUrl = blobClient.Uri.ToString(); 
 	
+        // Update product image filename
         Product.Image = uploadedFile.Name;
     }
 
+    // Save product (create or update)
     public void SaveProduct()
     {
         if (Id == 0)
@@ -245,6 +257,9 @@
         NavManager?.NavigateTo("/admin/products");
     }
 
+    // Theme for the Save button (primary for new, warning for edit)
     public string ThemeColor => Id == 0 ? "primary" : "warning";
+
+    // Text for the header
     public string TitleText => Id == 0 ? "Create" : "Edit";
 }

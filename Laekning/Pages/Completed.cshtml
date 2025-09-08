@@ -1,13 +1,21 @@
-@page
+@page   <!-- Marks this file as a Razor Page and enables routing -->
 
 <div class="text-center">
+    <!-- Thank-you message displayed after order submission -->
 	<h2>Thanks!</h2>
+
+    <!-- Displays the order ID dynamically (bound from query string or route) -->
 	<p>Thanks for placing order #@OrderId</p>
-	<p>We'll ship your goods as soon as possible.</p>
+
+    <p>We'll ship your goods as soon as possible.</p>
+
+    <!-- Button link back to the store's home page -->
 	<a class="btn btn-primary" asp-controller="Home">Return to Store</a>
 </div>
 
 @functions {
- [BindProperty(SupportsGet = true)]
- public string? OrderId { get; set; }
+    // Property bound from query string or route (SupportsGet = true allows reading via URL).
+    // Example: /OrderConfirmed?OrderId=123 will bind 123 into OrderId.
+    [BindProperty(SupportsGet = true)]
+    public string? OrderId { get; set; }
 }

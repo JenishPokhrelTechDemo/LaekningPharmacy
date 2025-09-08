@@ -1,53 +1,60 @@
 @page
 @model Laekning.Pages.RecommendationsModel
 @{
+    // Set the page title for the browser tab and SEO purposes
     ViewData["Title"] = "Recommended Products";
 }
 
 <style>
+    /* Container for the header content */
+    .content {
+        width: 100%;
+        min-height: 30px;
+        flex-grow: 1; /* allow container to grow if needed */
+        background-color: rgba(0, 0, 0, 0.6); /* semi-transparent dark background */
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+        box-shadow: 0 4px 10px rgba(0, 255, 255, 0.3); /* subtle cyan glow */
+        backdrop-filter: blur(8px); /* blur effect behind container */
+    }
 
-		.content {
-			width: 100%;
-			min-height: 30px;
-            flex-grow: 1;
-            background-color: rgba(0, 0, 0, 0.6); 
-            padding: 20px;
-            border-radius: 10px;
-			text-align: center;
-            box-shadow:  0 4px 10px rgba(0, 255, 255, 0.3);
-			backdrop-filter: blur(8px);
-		}
-		
-		.silver-text-subtext {
-			font-family: "Copperplate Gothic Bold", "Gloock", serif; /* Fallback to Gloock if Copperplate is unavailable */
-			background: linear-gradient(135deg, #d9d9d9, #ffffff, #a6a6a6, #e0e0e0);
-			-webkit-background-clip: text;
-			-webkit-text-fill-color: transparent;
-			text-shadow: 2px 2px 5px rgba(255, 255, 255, 0.6),
-						-2px -2px 5px rgba(100, 100, 100, 0.3);
-			letter-spacing: 2px; 
-		}
-
+    /* Silver-style gradient text for subheadings */
+    .silver-text-subtext {
+        font-family: "Copperplate Gothic Bold", "Gloock", serif; /* fallback to Gloock */
+        background: linear-gradient(135deg, #d9d9d9, #ffffff, #a6a6a6, #e0e0e0);
+        -webkit-background-clip: text; /* clip background to text */
+        -webkit-text-fill-color: transparent; /* make text take gradient color */
+        text-shadow: 2px 2px 5px rgba(255, 255, 255, 0.6),
+                     -2px -2px 5px rgba(100, 100, 100, 0.3); /* glow effect */
+        letter-spacing: 2px; /* space out letters */
+    }
 </style>
-		
 
-<h2 class="content"><div class="silver-text-subtext">Products you might require</div></h2>
+<!-- Header section for recommended products -->
+<h2 class="content">
+    <div class="silver-text-subtext">Products you might require</div>
+</h2>
 
+<!-- Check if there are recommended products -->
 @if (!Model.RecommendedProducts.Any())
 {
+    <!-- Show a warning message if no recommendations exist -->
     <div class="alert alert-warning text-center mt-4">
         No recommendations available.
     </div>
 }
 else
 {
+    <!-- Container for recommended products -->
     <div class="category-page">
         <div class="products-container d-flex flex-wrap justify-content-center gap-4">
+            <!-- Loop through each recommended product -->
             @foreach (var product in Model.RecommendedProducts)
             {
+                <!-- Render the ProductSummary partial view for each product -->
                 @await Html.PartialAsync("ProductSummary", product)
             }
         </div>
     </div>
 }
-

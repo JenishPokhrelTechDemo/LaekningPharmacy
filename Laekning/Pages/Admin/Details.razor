@@ -1,7 +1,9 @@
 ﻿@page "/admin/products/details/{id:long}"
 @inherits OwningComponentBase<IStoreRepository>
 
+<!-- CSS for styling the page -->
 <style>
+    /* Glassy container styling for the product details section */
     .glassy-container {
         background: rgba(255, 255, 255, 0.2) !important;
         backdrop-filter: blur(20px) brightness(1.3);
@@ -17,6 +19,7 @@
         margin-right: auto;
     }
 
+    /* Table styling for product details */
     .glassy-table {
         width: 100%;
         border-collapse: collapse;
@@ -31,12 +34,14 @@
         font-weight: 500;
     }
 
+    /* Table header styling */
     .glassy-table th {
         background: rgba(255, 255, 255, 0.85);
         font-weight: bold;
         color: #000;
     }
 
+    /* Header above the table */
     .custom-header {
         text-align: center;
         font-size: 1.75rem;
@@ -48,6 +53,7 @@
         color: #000;
     }
 
+    /* Button styling */
     .btn-warning, .btn-secondary {
         margin-right: 0.5rem;
         font-weight: bold;
@@ -55,9 +61,10 @@
     }
 </style>
 
-
+<!-- Page header -->
 <h3 class="custom-header">Product Details</h3>
 
+<!-- Container showing product details in a table -->
 <div class="glassy-container">
     <table class="glassy-table">
         <tbody>
@@ -66,31 +73,38 @@
             <tr><th>Description</th><td>@Product?.Description</td></tr>
             <tr><th>Category</th><td>@Product?.Category</td></tr>
             <tr><th>Price</th><td>@Product?.Price.ToString("C")</td></tr>
-			<tr><th>Illustration</th><td><img src="/images/@Product.Image" alt="@Product.Name" style="max-width:150px;" /></td></tr>
+            <tr>
+                <th>Illustration</th>
+                <td>
+                    <img src="/images/@Product.Image" alt="@Product.Name" style="max-width:150px;" />
+                </td>
+            </tr>
         </tbody>
     </table>
 </div>
 
+<!-- Navigation buttons -->
 <NavLink class="btn btn-warning" href="@EditUrl">Edit</NavLink>
 <NavLink class="btn btn-secondary" href="/admin/products">Back</NavLink>
 
-
 @code {
 
+    // Inject the repository service to access products
     [Inject]
     public IStoreRepository? Repository { get; set; }
 
+    // Product ID passed as a route parameter
     [Parameter]
     public long Id { get; set; }
 
+    // The product to display
     public Product? Product { get; set; }
 
+    // Load the product based on the ID whenever parameters change
     protected override void OnParametersSet() {
-        Product = 
-            Repository?.Products.FirstOrDefault(p => p.ProductID == Id);
+        Product = Repository?.Products.FirstOrDefault(p => p.ProductID == Id);
     }
 
+    // URL for editing this product
     public string EditUrl => $"/admin/products/edit/{Product?.ProductID}";
 }
-
-

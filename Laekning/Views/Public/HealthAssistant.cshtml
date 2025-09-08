@@ -1,26 +1,34 @@
 @model List<Laekning.Controllers.ChatMessage>
 
 @{
+    // Page title and layout
     ViewData["Title"] = "Health Assistant";
     Layout = "~/Views/Shared/_Layout.cshtml"; 
 }
+
+<!-- Main Chat Wrapper -->
 <div class="chat-wrapper">
+    <!-- Glassy/frosted container for chat UI -->
     <div class="chat-glass-container">
         <h2 class="glow-heading">Health Assistant</h2>
 
+        <!-- Chat messages display -->
         <div id="chat-box">
             @if (Model != null && Model.Any())
             {
+                // Loop through all chat messages
                 foreach (var msg in Model)
                 {
+                    // Determine bubble class based on role
                     var cssClass = msg.Role == "user" ? "chat-bubble user" : "chat-bubble bot";
                     <div class="@cssClass">
-                        @Html.Raw(msg.Content)
+                        @Html.Raw(msg.Content) <!-- Render message content as HTML -->
                     </div>
                 }
             }
         </div>
 
+        <!-- Chat input form -->
         <form class="chat-form" method="post">
             <input type="text" name="query" placeholder="Ask me anything..." autocomplete="off" />
             <button type="submit">Send</button>
@@ -29,12 +37,13 @@
 </div>
 
 <script>
-    // Auto-scroll to the bottom on page load
+    // Auto-scroll chat box to the bottom on page load so latest messages are visible
     const chatBox = document.getElementById('chat-box');
     chatBox.scrollTop = chatBox.scrollHeight;
 </script>
 
 <style>
+    /* Fullscreen background image */
     body {
         background-image: url('/images/molecular-illustration.jpg'); 
         background-size: cover;
@@ -42,39 +51,43 @@
         background-attachment: fixed;
     }
     
+    /* Main chat wrapper positioning */
     .chat-wrapper {
         position: absolute;
         top: 100px;
         left: 50%;
-        transform: translateX(-61%);
+        transform: translateX(-61%); /* Center horizontally (custom offset for design) */
         z-index: 1;
     }
 
+    /* Frosted glass effect container */
     .chat-glass-container {
         width: 100%;
         max-width: 800px;
         height: 90vh;
         display: flex;
-        flex-direction: column;
+        flex-direction: column; /* Stack header, chat box, and form vertically */
         justify-content: center;
         align-items: center;
         padding: 25px;
         border-radius: 15px;
         background: rgba(0, 0, 0, 0.6);
-        backdrop-filter: blur(12px);
-        box-shadow: 0 0 30px rgba(0, 255, 255, 0.2);
+        backdrop-filter: blur(12px); /* Glassy blur effect */
+        box-shadow: 0 0 30px rgba(0, 255, 255, 0.2); /* Soft cyan glow */
         color: #fff;
         box-sizing: border-box;
     }
 
+    /* Scrollable chat messages container */
     #chat-box {
-        flex-grow: 1;
-        overflow-y: auto;
+        flex-grow: 1; /* Fill available vertical space */
+        overflow-y: auto; /* Scroll if content overflows */
         margin-bottom: 15px;
         padding-right: 10px;
         width: 100%;
     }
 
+    /* Heading styling */
     .glow-heading {
         text-align: center;
         font-size: 2em;
@@ -83,15 +96,17 @@
         margin-bottom: 20px;
     }
 
+    /* Generic chat bubble styling */
     .chat-bubble {
         padding: 10px 15px;
         margin: 10px;
         border-radius: 10px;
         background: rgba(0, 255, 255, 0.1);
         box-shadow: 0 0 12px rgba(0, 255, 255, 0.5);
-        max-width: 70%;
+        max-width: 70%; /* Limit width */
     }
 
+    /* User messages: right aligned with distinct color */
     .chat-bubble.user {
         margin-left: auto;
         text-align: right;
@@ -101,6 +116,7 @@
         box-shadow: 0 0 10px rgba(150, 255, 255, 0.4);
     }
 
+    /* Bot messages: left aligned with different color */
     .chat-bubble.bot {
         margin-right: auto;
         text-align: left;
@@ -110,12 +126,14 @@
         box-shadow: 0 0 12px rgba(0, 180, 255, 0.3);
     }
 
+    /* Chat input form layout */
     .chat-form {
         display: flex;
         gap: 10px;
         width: 100%;
     }
 
+    /* Input box styling */
     .chat-form input[type="text"] {
         flex-grow: 1;
         padding: 10px;
@@ -125,12 +143,13 @@
         border-radius: 10px;
     }
 
+    /* Submit button styling */
     .chat-form button {
         padding: 10px 20px;
         background: cyan;
         color: black;
         border: none;
         border-radius: 10px;
-        box-shadow: 0 0 10px cyan;
+        box-shadow: 0 0 10px cyan; /* Neon glow effect */
     }
 </style>

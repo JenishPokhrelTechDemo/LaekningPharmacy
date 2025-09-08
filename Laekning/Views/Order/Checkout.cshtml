@@ -1,196 +1,306 @@
 @model Order
 
+<!-- Page Heading -->
 <h2 class="silver-text">Check out now</h2>
 <p class="silver-text-subtext">Please enter your details, and we'll ship your goods right away!</p>
 
+<!-- Display validation errors -->
 <div asp-validation-summary="All" class="text-danger"></div>
 
+<!-- Checkout form -->
 <form asp-action="Checkout" method="post">
-	<h3 class="silver-text-heading">Ship to</h3>
-	<div class="form-group">
-		<label class="silver-text-subtext">Name:</label>
-		<input asp-for="Name" class="form-control" />
-	</div>
-	<h3 class="silver-text-heading">Address</h3>
-	<div class="form-group">
-		<label class="silver-text-subtext">Line1:</label>
-		<input asp-for="Line1" class="form-control" />
-	</div>
-	<div class="form-group">
-		<label class="silver-text-subtext">Line2:</label>
-		<input asp-for="Line2" class="form-control" />
-	</div>
-	<div class="form-group">
-		<label class="silver-text-subtext">Line3:</label>
-		<input asp-for="Line3" class="form-control" />
-	</div>
-	<div class="form-group">
-		<label class="silver-text-subtext">City:</label>
-		<input asp-for="City" class="form-control" />
-	</div>
-	<div class="form-group">
-		<label class="silver-text-subtext">State:</label>
-		<input asp-for="State" class="form-control" />
-	</div>
-	<div class="form-group">
-		<label class="silver-text-subtext">Zip:</label>
-		<input asp-for="Zip" class="form-control" />
-	</div>
-	<div class="form-group">
-		<label class="silver-text-subtext">Country:</label>
-		<input asp-for="Country" class="form-control" />
-	</div>
-	<h3 class="silver-text-heading">Options</h3>
-	<div class="checkbox">
-		<label class="silver-text-subtext">
-		<input asp-for="GiftWrap" /> Gift wrap these items
-		</label>
-	</div>
-	<div class="text-center">
-		<input class="btn btn-primary" type="submit" value="Complete Order" />
-	</div>
-	
+
+    <!-- Shipping Information Section -->
+    <h3 class="silver-text-heading">Ship to</h3>
+    <div class="form-group">
+        <label class="silver-text-subtext">Name:</label>
+        <input asp-for="Name" class="form-control" /> <!-- Bind to Order.Name -->
+    </div>
+
+    <!-- Address Section -->
+    <h3 class="silver-text-heading">Address</h3>
+    <div class="form-group">
+        <label class="silver-text-subtext">Line1:</label>
+        <input asp-for="Line1" class="form-control" /> <!-- Address Line 1 -->
+    </div>
+    <div class="form-group">
+        <label class="silver-text-subtext">Line2:</label>
+        <input asp-for="Line2" class="form-control" /> <!-- Address Line 2 -->
+    </div>
+    <div class="form-group">
+        <label class="silver-text-subtext">Line3:</label>
+        <input asp-for="Line3" class="form-control" /> <!-- Optional Line 3 -->
+    </div>
+    <div class="form-group">
+        <label class="silver-text-subtext">City:</label>
+        <input asp-for="City" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label class="silver-text-subtext">State:</label>
+        <input asp-for="State" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label class="silver-text-subtext">Zip:</label>
+        <input asp-for="Zip" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label class="silver-text-subtext">Country:</label>
+        <input asp-for="Country" class="form-control" />
+    </div>
+
+    <!-- Optional Gift Wrap Section -->
+    <h3 class="silver-text-heading">Options</h3>
+    <div class="checkbox">
+        <label class="silver-text-subtext">
+            <input asp-for="GiftWrap" /> Gift wrap these items
+        </label>
+    </div>
+
+    <!-- Submit Button -->
+    <div class="text-center">
+        <input class="btn btn-primary" type="submit" value="Complete Order" />
+    </div>
 </form>
 
+<!-- Styles -->
 <style>
-    /* Ensure background styling */
+    /* Fullscreen background image for checkout page */
     body {
-        background-image: url('/images/molecular-illustration.jpg'); /* Ensure correct path */
+        background-image: url('/images/molecular-illustration.jpg'); /* Path to background */
         background-size: cover;
         background-position: center;
-        background-attachment: fixed;
+        background-attachment: fixed; /* Background stays fixed on scroll */
     }
-	
-	    /* Darken the form background for contrast */
-.checkout-container {
-    background: rgba(0, 0, 0, 0.8); /* Stronger dark overlay */
-    padding: 25px;
-    border-radius: 10px;
-    max-width: 600px;
-    margin: auto;
-    box-shadow: 0 0 15px rgba(0, 255, 255, 0.6); /* Glow effect */
-}
 
-/* Make input fields more visible */
-.form-control {
-    background: rgba(255, 255, 255, 0.2); /* Semi-transparent but readable */
-    color: #ffffff;
-    border: 2px solid rgba(0, 255, 255, 0.9);
-    padding: 12px;
-    font-size: 16px;
-    border-radius: 6px;
-}
+    /* Container styling for glassy/frosted checkout form */
+    .checkout-container {
+        background: rgba(0, 0, 0, 0.4); /* Semi-transparent dark overlay */
+        backdrop-filter: blur(10px);     /* Frosted glass effect */
+        padding: 25px;
+        border-radius: 15px;
+        max-width: 600px;
+        margin: auto;
+        box-shadow: 0 0 15px rgba(0, 255, 255, 0.4); /* Soft cyan glow */
+        border: 1px solid rgba(255, 255, 255, 0.2);  /* Subtle border */
+    }
 
-/* Ensure placeholders are visible */
-.form-control::placeholder {
-    color: rgba(255, 255, 255, 0.6);
-}
+    /* Input fields styling */
+    .form-control {
+        background: rgba(255, 255, 255, 0.1); /* Frosted glass effect */
+        backdrop-filter: blur(5px);
+        color: silver; /* Text color */
+        border: 1px solid rgba(0, 255, 255, 0.7); /* Cyan border */
+        padding: 12px;
+        font-size: 16px;
+        border-radius: 8px;
+        font-weight: bold;
+        transition: all 0.3s ease-in-out;
+    }
 
-/* Improve text readability */
-.silver-text, .silver-text-heading, .silver-text-subtext {
-    color: #ffffff;
-    text-shadow: 0 0 10px rgba(0, 255, 255, 0.9), 0 0 15px rgba(100, 100, 100, 0.5);
-}
+    /* Input hover/focus effect */
+    .form-control:hover, .form-control:focus {
+        background: rgba(255, 255, 255, 0.2);
+        box-shadow: 0 0 8px rgba(0, 255, 255, 0.6); /* Cyan glow */
+    }
 
-/* More prominent button */
-.btn-primary {
-    background: rgba(0, 255, 255, 1);
-    color: black;
-    font-weight: bold;
-    padding: 10px 20px;
-    border-radius: 5px;
-    box-shadow: 0 0 10px rgba(0, 255, 255, 1);
-    transition: all 0.3s ease-in-out;
-}
+    /* Placeholder text styling */
+    .form-control::placeholder {
+        color: rgba(255, 255, 255, 0.5);
+    }
 
-.btn-primary:hover {
-    background: rgba(0, 255, 255, 1);
-    box-shadow: 0 0 20px rgba(0, 255, 255, 1);
-}
+    /* Label styling for readability */
+    label {
+        font-size: 16px;
+        font-weight: bold;
+        color: rgba(255, 255, 255, 0.9);
+    }
 
-/* Make labels stand out */
-label {
-    font-size: 16px;
-    font-weight: bold;
-    color: white;
-}
+    /* Headings and descriptive text styling */
+    .silver-text, .silver-text-heading, .silver-text-subtext {
+        color: #ffffff;
+        text-shadow: 0 0 10px rgba(0, 255, 255, 0.9),
+                     0 0 15px rgba(100, 100, 100, 0.5);
+    }
 
-/* Glassy Checkout Form */
-.checkout-container {
-    background: rgba(0, 0, 0, 0.4); /* Semi-transparent dark */
-    backdrop-filter: blur(10px); /* Blur effect */
-    padding: 25px;
-    border-radius: 15px;
-    max-width: 600px;
-    margin: auto;
-    box-shadow: 0 0 15px rgba(0, 255, 255, 0.4); /* Soft glow */
-    border: 1px solid rgba(255, 255, 255, 0.2); /* Subtle border */
-}
+    /* Primary button styling */
+    .btn-primary {
+        background: rgba(0, 255, 255, 0.7);
+        color: black;
+        font-weight: bold;
+        padding: 12px 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 255, 255, 0.7); /* Cyan glow */
+        transition: all 0.3s ease-in-out;
+    }
 
-/* Glassy Input Fields */
-.form-control {
-    background: rgba(255, 255, 255, 0.1); /* Frosted glass effect */
-    backdrop-filter: blur(5px);
-    color: #ffffff;
-    border: 1px solid rgba(0, 255, 255, 0.7);
-    padding: 12px;
-    font-size: 16px;
-    border-radius: 8px;
-    transition: all 0.3s ease-in-out;
-	color: silver; /* Silver text */
-    font-weight: bold;
-}
+    .btn-primary:hover {
+        background: rgba(0, 255, 255, 1);
+        box-shadow: 0 0 20px rgba(0, 255, 255, 1);
+    }
 
-/* Input Hover Effect */
-.form-control:hover, .form-control:focus {
-    background: rgba(255, 255, 255, 0.2);
-    box-shadow: 0 0 8px rgba(0, 255, 255, 0.6);
-}
-
-/* Placeholder Styling */
-.form-control::placeholder {
-    color: rgba(255, 255, 255, 0.5);
-}
-
-/* Labels for Readability */
-label {
-    font-size: 16px;
-    font-weight: bold;
-    color: rgba(255, 255, 255, 0.9);
-}
-
-/* Improved Button Styling */
-.btn-primary {
-    background: rgba(0, 255, 255, 0.7);
-    color: black;
-    font-weight: bold;
-    padding: 12px 20px;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 255, 255, 0.7);
-    transition: all 0.3s ease-in-out;
-}
-
-.btn-primary:hover {
-    background: rgba(0, 255, 255, 1);
-    box-shadow: 0 0 20px rgba(0, 255, 255, 1);
-}
-
-/* Darker Background Overlay for Better Contrast */
-body::before {
-    content: "";
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.3);
-    backdrop-filter: blur(5px);
-    z-index: -1;
-}
-
-
-
-	
+    /* Dark overlay behind content for better contrast */
+    body::before {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(5px);
+        z-index: -1; /* Place behind all content */
+    }
 </style>
+@model Order
 
+<!-- Page Heading -->
+<h2 class="silver-text">Check out now</h2>
+<p class="silver-text-subtext">Please enter your details, and we'll ship your goods right away!</p>
 
+<!-- Display validation errors -->
+<div asp-validation-summary="All" class="text-danger"></div>
+
+<!-- Checkout form -->
+<form asp-action="Checkout" method="post">
+
+    <!-- Shipping Information Section -->
+    <h3 class="silver-text-heading">Ship to</h3>
+    <div class="form-group">
+        <label class="silver-text-subtext">Name:</label>
+        <input asp-for="Name" class="form-control" /> <!-- Bind to Order.Name -->
+    </div>
+
+    <!-- Address Section -->
+    <h3 class="silver-text-heading">Address</h3>
+    <div class="form-group">
+        <label class="silver-text-subtext">Line1:</label>
+        <input asp-for="Line1" class="form-control" /> <!-- Address Line 1 -->
+    </div>
+    <div class="form-group">
+        <label class="silver-text-subtext">Line2:</label>
+        <input asp-for="Line2" class="form-control" /> <!-- Address Line 2 -->
+    </div>
+    <div class="form-group">
+        <label class="silver-text-subtext">Line3:</label>
+        <input asp-for="Line3" class="form-control" /> <!-- Optional Line 3 -->
+    </div>
+    <div class="form-group">
+        <label class="silver-text-subtext">City:</label>
+        <input asp-for="City" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label class="silver-text-subtext">State:</label>
+        <input asp-for="State" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label class="silver-text-subtext">Zip:</label>
+        <input asp-for="Zip" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label class="silver-text-subtext">Country:</label>
+        <input asp-for="Country" class="form-control" />
+    </div>
+
+    <!-- Optional Gift Wrap Section -->
+    <h3 class="silver-text-heading">Options</h3>
+    <div class="checkbox">
+        <label class="silver-text-subtext">
+            <input asp-for="GiftWrap" /> Gift wrap these items
+        </label>
+    </div>
+
+    <!-- Submit Button -->
+    <div class="text-center">
+        <input class="btn btn-primary" type="submit" value="Complete Order" />
+    </div>
+</form>
+
+<!-- Styles -->
+<style>
+    /* Fullscreen background image for checkout page */
+    body {
+        background-image: url('/images/molecular-illustration.jpg'); /* Path to background */
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed; /* Background stays fixed on scroll */
+    }
+
+    /* Container styling for glassy/frosted checkout form */
+    .checkout-container {
+        background: rgba(0, 0, 0, 0.4); /* Semi-transparent dark overlay */
+        backdrop-filter: blur(10px);     /* Frosted glass effect */
+        padding: 25px;
+        border-radius: 15px;
+        max-width: 600px;
+        margin: auto;
+        box-shadow: 0 0 15px rgba(0, 255, 255, 0.4); /* Soft cyan glow */
+        border: 1px solid rgba(255, 255, 255, 0.2);  /* Subtle border */
+    }
+
+    /* Input fields styling */
+    .form-control {
+        background: rgba(255, 255, 255, 0.1); /* Frosted glass effect */
+        backdrop-filter: blur(5px);
+        color: silver; /* Text color */
+        border: 1px solid rgba(0, 255, 255, 0.7); /* Cyan border */
+        padding: 12px;
+        font-size: 16px;
+        border-radius: 8px;
+        font-weight: bold;
+        transition: all 0.3s ease-in-out;
+    }
+
+    /* Input hover/focus effect */
+    .form-control:hover, .form-control:focus {
+        background: rgba(255, 255, 255, 0.2);
+        box-shadow: 0 0 8px rgba(0, 255, 255, 0.6); /* Cyan glow */
+    }
+
+    /* Placeholder text styling */
+    .form-control::placeholder {
+        color: rgba(255, 255, 255, 0.5);
+    }
+
+    /* Label styling for readability */
+    label {
+        font-size: 16px;
+        font-weight: bold;
+        color: rgba(255, 255, 255, 0.9);
+    }
+
+    /* Headings and descriptive text styling */
+    .silver-text, .silver-text-heading, .silver-text-subtext {
+        color: #ffffff;
+        text-shadow: 0 0 10px rgba(0, 255, 255, 0.9),
+                     0 0 15px rgba(100, 100, 100, 0.5);
+    }
+
+    /* Primary button styling */
+    .btn-primary {
+        background: rgba(0, 255, 255, 0.7);
+        color: black;
+        font-weight: bold;
+        padding: 12px 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 255, 255, 0.7); /* Cyan glow */
+        transition: all 0.3s ease-in-out;
+    }
+
+    .btn-primary:hover {
+        background: rgba(0, 255, 255, 1);
+        box-shadow: 0 0 20px rgba(0, 255, 255, 1);
+    }
+
+    /* Dark overlay behind content for better contrast */
+    body::before {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(5px);
+        z-index: -1; /* Place behind all content */
+    }
+</style>
