@@ -1,17 +1,13 @@
 @page
 @model Laekning.Pages.SearchResultsModel
 @{
-    ViewData["Title"] = "Search Results"; // Page title for browser/tab
+    ViewData["Title"] = "Search Results";
 }
 
-<!-- Check if search term is empty -->
 @if (string.IsNullOrWhiteSpace(Model.ExtractedInscription))
 {
-    <div class="alert alert-info mt-4">
-        Please enter a search term.
-    </div>
+    <div class="alert alert-info mt-4">Please enter a search term.</div>
 }
-<!-- Check if there are no matching products -->
 else if (Model.ProductsList == null || !Model.ProductsList.Any())
 {
     <div class="alert alert-warning mt-4">
