@@ -7,12 +7,13 @@ variables:
 stages:
 
 
+
 # -------------------------------
 # Stage 3: Build ASP.NET Core App
 # -------------------------------
 - stage: Build_ASPNET
   displayName: "Build ASP.NET Core App"
-  #dependsOn: Deploy_FunctionApp
+ # dependsOn: Deploy_FunctionApp
   jobs:
   - job: Build_ASPNET
     pool:
@@ -129,4 +130,5 @@ stages:
               azureSubscription: 'Laekning Service Connection'
               appName: '$(WebAppName)'
               package: '$(Pipeline.Workspace)/drop/$(buildConfiguration)/*.zip'
+
 
