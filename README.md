@@ -123,7 +123,7 @@ This project demonstrates **secure infrastructure, event-driven architecture, an
 
 7.      The managed identity then retrieves the credentials for Azure SQL database and Azure OpenAI Service on the behalf of the function app.
 
-8.      The function app then uses the retrieved credentials from Step 7 to call the Azure OpenAI Service which then performs the required operations to return the product recommendations.
+8.      The function app then uses the retrieved credentials from Step 7 to call the Azure OpenAI Service which then performs the required operations to return the product recommendations(checking for similar products which matches similar descriptions for previously purchased products).
 
 9.      The function app then queries the actual product database to check if the product exists, which then gets displayed on the front page of the ASP.NET application.
 
