@@ -77,3 +77,4 @@ stages:
               appType: functionAppLinux
               appName: $(functionAppName)
               package: '$(Pipeline.Workspace)/drop-function/$(Build.BuildId).zip'
+
