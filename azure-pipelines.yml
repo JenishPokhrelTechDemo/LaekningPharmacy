@@ -6,129 +6,74 @@ variables:
   
 stages:
 
-
-
 # -------------------------------
-# Stage 3: Build ASP.NET Core App
+# Stage 1: Package Python Function App
 # -------------------------------
-- stage: Build_ASPNET
-  displayName: "Build ASP.NET Core App"
- # dependsOn: Deploy_FunctionApp
+- stage: Package_FunctionApp
+  displayName: "Package Python Function App"
+  
   jobs:
-  - job: Build_ASPNET
+  - job: Package_FunctionApp
+    displayName: Build
     pool:
-      vmImage: windows-latest
+      vmImage: $(vmImageName)
 
     steps:
-    - task: UseDotNet@2
-      displayName: 'Use .NET SDK 8.x'
-      inputs:
-        packageType: sdk
-        version: '8.x'
-    
-    - script: 'echo "$(Build.DefinitionName), $(Build.BuildId), $(Build.BuildNumber)" > buildinfo.txt'
-      displayName: 'Write build info'
-      workingDirectory: Laekning/wwwroot
+    - bash: |
+        if [ -f extensions.csproj ]
+        then
+            dotnet build extensions.csproj --runtime ubuntu.22.04-x64 --output ./bin 
+        fi
+      workingDirectory: $(workingDirectory)
+      displayName: 'Build extensions'
 
-    - task: DotNetCoreCLI@2
-      displayName: 'Restore project dependencies'
+    - task: UsePythonVersion@0
+      displayName: 'Use Python 3.11'
       inputs:
-        command: 'restore'
-        projects: 'Laekning/Laekning.csproj'
-        arguments: '--prerelease'
-    
-    - task: DotNetCoreCLI@2
-      displayName: 'Build the project - Release'
-      inputs:
-        command: 'build'
-        arguments: '--no-restore --configuration Release'
-        projects: 'Laekning/Laekning.csproj'
+        versionSpec: 3.11
 
-# -------------------------------
-# Stage 4: Run Unit Tests
-# -------------------------------
-- stage: Test_ASPNET
-  variables:
-    buildConfiguration: 'Release'
-  displayName: "Run ASP.NET Unit Tests"
-  dependsOn: Build_ASPNET
-  jobs:
-  - job: Test_ASPNET
-    pool:
-      vmImage: windows-latest
+    - bash: |
+        python -m venv antenv
+        source antenv/bin/activate
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt --target="./.python_packages/lib/site-packages"
+      workingDirectory: $(workingDirectory)
+      displayName: 'Install application dependencies'
 
-    steps:
-    - task: UseDotNet@2
-      displayName: 'Use .NET SDK 8.x'
+    - task: ArchiveFiles@2
+      displayName: 'Archive files'
       inputs:
-        packageType: sdk
-        version: '8.x'
-        
-    - task: DotNetCoreCLI@2
-      displayName: 'Run unit tests - $(buildConfiguration)'
-      inputs:
-        command: 'test'
-        arguments: '--configuration $(buildConfiguration)'
-        publishTestResults: true
-        projects: 'Laekning.Tests.csproj' 
-        
-        
-# -------------------------------
-# Stage 5: Publish ASP.NET Core App
-# -------------------------------
-- stage: Publish_ASPNET
-  displayName: "Publish ASP.NET Core App"
-  dependsOn: Test_ASPNET
-  jobs:
-  - job: Publish_ASPNET
-    pool:
-      vmImage: windows-latest
-    
-    steps:
-    - task: UseDotNet@2
-      displayName: 'Use .NET SDK 8.x'
-      inputs:
-        packageType: sdk
-        version: '8.x'
-        
-    - task: DotNetCoreCLI@2
-      displayName: 'Publish the project - Release'
-      inputs:
-        command: 'publish'
-        projects: 'Laekning/Laekning.csproj'
-        publishWebProjects: false
-        arguments: '--configuration Release --output $(Build.ArtifactStagingDirectory)/Release'
-        zipAfterPublish: true
+        rootFolderOrFile: '$(workingDirectory)'
+        includeRootFolder: false
+        archiveType: zip
+        archiveFile: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
+        replaceExistingArchive: true
 
-    - task: PublishBuildArtifacts@1
-      displayName: 'Publish Artifact: drop'
-      condition: succeeded()
-
+    - publish: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
+      artifact: drop-function
 
 # -------------------------------
-# Stage 6: Deploy ASP.NET Core App
+# Stage 2: Deploy Python Function App
 # -------------------------------
-- stage: Deploy_ASPNET
-  displayName: "Deploy the web application"
-  dependsOn: Publish_ASPNET
+- stage: Deploy_FunctionApp
+  displayName: "Deploy Python Function App"
+  dependsOn: Package_FunctionApp
+  condition: succeeded()
   jobs:
   - deployment: Deploy
+    displayName: Package_FunctionApp
+    environment: 'development'
     pool:
-      vmImage: windows-latest
-    environment: dev
-    variables:
-    - group: Release
+      vmImage: $(vmImageName)
     strategy:
       runOnce:
         deploy:
+
           steps:
-          - download: current
-            artifact: drop
-          - task: AzureWebApp@1
-            displayName: 'Azure App Service Deploy: website'
+          - task: AzureFunctionApp@2
+            displayName: 'Azure functions app deploy'
             inputs:
-              azureSubscription: 'Laekning Service Connection'
-              appName: '$(WebAppName)'
-              package: '$(Pipeline.Workspace)/drop/$(buildConfiguration)/*.zip'
-
-
+              azureSubscription: '$(azureSubscription)'
+              appType: functionAppLinux
+              appName: $(functionAppName)
+              package: '$(Pipeline.Workspace)/drop-function/$(Build.BuildId).zip'
