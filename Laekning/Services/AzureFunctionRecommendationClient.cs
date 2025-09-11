@@ -27,7 +27,11 @@ namespace Laekning.Services
 			// Key Vault retrieval code remains the same
 			string vaultUri = _config["AzureKeyVault:KeyVaultUrl"];
 			var client = new SecretClient(new Uri(vaultUri), new DefaultAzureCredential());
-			var functionUrl = client.GetSecret("AzureFunctionsRecommendUrl").Value;
+
+			KeyVaultSecret secretAzureFunctionsRecommendrl = client.GetSecret("AzureFunctionsRecommendUrl");
+            
+			var functionUrl = secretAzureFunctionsRecommendrl.Value;  // Retrived from Azure Key Vault
+            var functionKey = "";  // optional, depends on auth level
     
 			// Build payloads with name + category
 			var purchasedPayload = purchasedProducts

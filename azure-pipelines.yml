@@ -201,3 +201,37 @@ stages:
               appName: '$(WebAppName)'
               package: '$(Pipeline.Workspace)/drop/$(buildConfiguration)/*.zip'
 
+
+# -------------------------------
+# Stage 7: Build and Publish C++ EventHub Module
+# -------------------------------
+- stage: Build_EventHub
+  dependsOn: Deploy_ASPNET
+  variables:
+    buildConfiguration: 'Release'
+  displayName: "Build C++ EventHub"
+  jobs:
+  - job: Build_EventHub
+    pool:
+      vmImage: 'windows-latest'
+
+    steps:
+    - task: CMake@1
+      displayName: Configure
+      inputs:
+        workingDirectory: 'LaekningEventHub'
+        cmakeArgs: '-B build -S . -G "Visual Studio 17 2022" -A x64'
+
+    - task: CMake@1
+      displayName: Build
+      inputs:
+        workingDirectory: 'LaekningEventHub'
+        cmakeArgs: '--build build --config Release'
+
+    - task: PublishBuildArtifacts@1
+      displayName: Publish Executable
+      inputs:
+        PathtoPublish: 'LaekningEventHub/build/Release'
+        ArtifactName: 'drop-eventhub'
+        publishLocation: 'Container'
+
