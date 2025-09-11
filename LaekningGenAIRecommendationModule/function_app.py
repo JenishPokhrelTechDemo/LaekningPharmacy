@@ -2,6 +2,7 @@ import azure.functions as func  # Azure Functions SDK
 import json
 import os
 import logging
+import pyodbc
 from openai import AzureOpenAI  # Azure OpenAI SDK
 from azure.identity import DefaultAzureCredential  # Authentication helper
 from azure.keyvault.secrets import SecretClient  # Access Key Vault secrets
@@ -11,18 +12,20 @@ from azure.keyvault.secrets import SecretClient  # Access Key Vault secrets
 # -----------------------
 def get_all_products_from_db():
     """
-    Fetches all product names from the database.
+    Fetches all products with their categories from the database.
     Uses pyodbc connection string stored in Azure Function App settings.
+    Returns a list of dicts: [{"name": ..., "category": ...}, ...]
     """
     try:
-        conn_str = SQL_CONN_STRING  # Ensure this is set in Function App settings
+        conn_str = os.getenv("SQL_CONN_STRING")  # Ensure set in Function App settings
         with pyodbc.connect(conn_str) as conn:
             cursor = conn.cursor()
-            cursor.execute("SELECT Name FROM Products")  # Adjust table/column as needed
-            return [row[0] for row in cursor.fetchall()]  # Return list of product names
+            cursor.execute("SELECT Name, Category FROM Products")  # Adjust columns
+            return [{"name": row[0], "category": row[1]} for row in cursor.fetchall()]
     except Exception as e:
         logging.error(f"DB error: {str(e)}")
         return []  # Return empty list if DB fails
+
 
 # -----------------------
 # Azure Function App
@@ -38,6 +41,7 @@ def get_secret(name: str):
     client = SecretClient(vault_url=kv_uri, credential=cred)
     return client.get_secret(name).value  # Return the secret value
 
+
 # -----------------------
 # Main Function: Recommend Products
 # -----------------------
@@ -50,7 +54,7 @@ def get_secret(name: str):
 def recommend(req: func.HttpRequest) -> func.HttpResponse:
     """
     Receives POST request with purchased products and returns 3-5 recommended products
-    using Azure OpenAI.
+    from the same categories using Azure OpenAI.
     """
     try:
         # Lazy load secrets from Key Vault
@@ -68,8 +72,8 @@ def recommend(req: func.HttpRequest) -> func.HttpResponse:
     
         # Parse JSON request body
         req_body = req.get_json()
-        purchased = req_body.get("purchasedProducts", [])
-        all_products = req_body.get("allDbProductNames", [])
+        purchased = req_body.get("purchasedProducts", [])  # Expect list of product names
+        all_products = req_body.get("allDbProducts", [])   # Expect [{"name":..., "category":...}, ...]
 
         # If the full product list isn't passed, fetch from DB
         if not all_products:
@@ -83,20 +87,30 @@ def recommend(req: func.HttpRequest) -> func.HttpResponse:
                 mimetype="application/json"
             )
 
-        # Format product lists as strings for the AI prompt
-        purchased_str = ", ".join(purchased)
-        all_products_str = ", ".join(all_products)
+        # Format purchased + all products with categories
+        purchased_str = "; ".join([
+            f"{p} (Category: {prod['category']})"
+            for p in purchased
+            for prod in all_products if prod["name"] == p
+        ])
+
+        all_products_str = "; ".join([
+            f"{prod['name']} (Category: {prod['category']})"
+            for prod in all_products
+        ])
 
         # Construct the prompt for Azure OpenAI
         prompt = (
             f"You are a pharmacy assistant. A user has previously purchased these products: {purchased_str}. "
-            f"From the following available products: {all_products_str}, Including products from {purchased_str}, recommend 3–5 products that are in the same exact categories. "
-            f"Only return exact product names from the provided list, separated by commas. Do not include commentary or explanations. "
+            f"Adding to and including {purchased_str}, from the following available products: {all_products_str}, recommend 3–5 products that belong "
+            f"to the same exact categories as the purchased products. "
+            f"Only return exact product names from the provided list, separated by commas. "
+            f"Do not include commentary or explanations."
         )
 
         logging.info(f"Prompt sent to Azure OpenAI: {prompt}")
 
-        # Call Azure OpenAI (non-streaming completion)
+        # Call Azure OpenAI
         response = client.chat.completions.create(
             model=AZURE_OPENAI_DEPLOYMENT,
             messages=[{"role": "system", "content": prompt}]
@@ -107,15 +121,15 @@ def recommend(req: func.HttpRequest) -> func.HttpResponse:
         logging.info(f"Raw model output: {result_text}")
 
         # Normalize product names for exact matching
-        normalized_products = [p.lower().strip() for p in all_products]
+        normalized_products = [p["name"].lower().strip() for p in all_products]
         recommended_products = []
 
         # Split AI output and filter exact matches
         for rec in result_text.replace("\n", ",").split(","):
             rec_norm = rec.lower().strip()
             for idx, p in enumerate(normalized_products):
-                if rec_norm == p:  # Ensure only exact matches are returned
-                    recommended_products.append(all_products[idx])
+                if rec_norm == p:
+                    recommended_products.append(all_products[idx]["name"])
                     break
 
         logging.info(f"Filtered recommended products: {recommended_products}")
