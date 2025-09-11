@@ -22,51 +22,58 @@ namespace Laekning.Services
         }
 
         // Calls the Azure Function to get recommended products based on purchased products
-        public async Task<List<string>> GetRecommendedProductsAsync	(List<Product> purchasedProducts, List<Product> allDbProducts)
-		{
-			// Key Vault retrieval code remains the same
-			string vaultUri = _config["AzureKeyVault:KeyVaultUrl"];
-			var client = new SecretClient(new Uri(vaultUri), new DefaultAzureCredential());
-
-			KeyVaultSecret secretAzureFunctionsRecommendrl = client.GetSecret("AzureFunctionsRecommendUrl");
+        public async Task<List<string>> GetRecommendedProductsAsync(List<string> purchasedProducts, List<string> allDbProductNames)
+        {
+            // Get Key Vault URI from configuration
+            string vaultUri = _config["AzureKeyVault:KeyVaultUrl"];
             
-			var functionUrl = secretAzureFunctionsRecommendrl.Value;  // Retrived from Azure Key Vault
-            var functionKey = "";  // optional, depends on auth level
-    
-			// Build payloads with name + category
-			var purchasedPayload = purchasedProducts
-				.Select(p => new { name = p.Name, category = p.Category })
-				.ToList();
+            // Create a Key Vault client using managed identity or default credential
+            var client = new SecretClient(new Uri(vaultUri), new DefaultAzureCredential());
 
-			var allProductsPayload = allDbProducts
-				.Select(p => new { name = p.Name, category = p.Category })
-				.ToList();
+            // Retrieve the Azure Function URL stored in Key Vault
+            KeyVaultSecret secretAzureFunctionsRecommendrl = client.GetSecret("AzureFunctionsRecommendUrl");
+            var functionUrl = secretAzureFunctionsRecommendrl.Value;  // URL of the recommendation function
+            
+            var functionKey = "";  // Optional function key for authentication if needed
 
-			var payload = new
-			{
-				purchasedProducts = purchasedPayload,
-				allProducts = allProductsPayload
-			};
+            // Prepare payload to send to the Azure Function
+            var payload = new
+            {
+                purchasedProducts,    // List of products the user already purchased
+                allDbProductNames     // List of all products in the database
+            };
 
-			// Send POST request
-			var request = new HttpRequestMessage(HttpMethod.Post, functionUrl)
-			{
-				Content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json")
-			};
+            // Create an HTTP POST request with JSON payload
+            var request = new HttpRequestMessage(HttpMethod.Post, functionUrl)
+            {
+                Content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json")
+            };
 
-			var response = await _httpClient.SendAsync(request);
-			response.EnsureSuccessStatusCode();
+            // Include the function key in the request headers if required
+            if (!string.IsNullOrEmpty(functionKey))
+            {
+                request.Headers.Add("x-functions-key", functionKey);
+            }
 
-			var json = await response.Content.ReadAsStringAsync();
-			var doc = JsonDocument.Parse(json);
+            // Send the request to the Azure Function
+            var response = await _httpClient.SendAsync(request);
+            response.EnsureSuccessStatusCode(); // Throws exception if status code is not success
 
-			if (doc.RootElement.TryGetProperty("recommendedProducts", out var recs))
-			{
-				return recs.EnumerateArray().Select(e => e.GetString() ?? "").ToList();
-			}
+            // Read the JSON response
+            var json = await response.Content.ReadAsStringAsync();
 
-			return new List<string>();
-		}
+            // Parse the JSON response
+            var doc = JsonDocument.Parse(json);
 
+            // Extract the "recommendedProducts" array from the response
+            if (doc.RootElement.TryGetProperty("recommendedProducts", out var recs))
+            {
+                // Convert JSON array to a List<string>
+                return recs.EnumerateArray().Select(e => e.GetString() ?? "").ToList();
+            }
+
+            // Return empty list if no recommendations found
+            return new List<string>();
+        }
     }
 }
