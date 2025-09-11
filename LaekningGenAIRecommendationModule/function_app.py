@@ -48,7 +48,7 @@ def recommend(req: func.HttpRequest) -> func.HttpResponse:
         )
     
         req_body = req.get_json()
-        purchased = req_body.get("purchasedCategories", [])
+        purchased = req_body.get("purchasedProductDescriptions", [])
         all_products = req_body.get("allDbProductNames", [])
 
         # If not passed, fetch from DB
@@ -66,8 +66,8 @@ def recommend(req: func.HttpRequest) -> func.HttpResponse:
         all_products_str = ", ".join(all_products)
 
         prompt = (
-            f"You are a pharmacy assistant. A user has previously purchased these product categories: {purchased_str}. "
-            f"From the following available products: {all_products_str}, recommend products that are in the same categories. "
+            f"You are a pharmacy assistant. A user has previously purchased product for these reasons: {purchased_str}. "
+            f"From the following available products: {all_products_str}, recommend similar products that help deal with the same reasons. "
             f"Only return exact product names from the provided list, separated by commas. Do not include commentary or explanations."
         )
 

@@ -23,8 +23,8 @@ namespace Laekning.Pages
             _recommendationClient = recommendationClient;
         }
 
-        // List of product names recently purchased by users
-        public List<string> PurchasedProducts { get; set; } = new();
+        // List of product categories recently purchased by users
+        public List<string> PurchasedCategories { get; set; } = new();
 
         // List of recommended Product objects to display on the page
         public List<Product> RecommendedProducts { get; set; } = new();
@@ -32,26 +32,27 @@ namespace Laekning.Pages
         // Called when the page is requested via GET
         public async Task OnGetAsync()
         {
-            // Get last 4 purchased products across all orders
-            PurchasedProducts = _repository.Orders
-                .Include(o => o.Lines) // include order lines
-                .ThenInclude(l => l.Product) // include product details
-                .OrderByDescending(o => o.OrderDate) // most recent orders first
-                .SelectMany(o => o.Lines.Select(l => l.Product.Name)) // flatten to list of product names
-                .Distinct()          // optional: avoid duplicates
-                .Take(4)             // take only 4 recent purchases
+            // Get last 4 purchased product categories across all orders
+            PurchasedCategories = _repository.Orders
+                .Include(o => o.Lines)
+                .ThenInclude(l => l.Product)
+                .OrderByDescending(o => o.OrderDate)
+                .SelectMany(o => o.Lines.Select(l => l.Product.Category))
+                .Take(4) // take 4 most recent categories
+                .Distinct() // optional, remove duplicates
                 .ToList();
 
-            // Fallback if no purchases exist (new store / no orders)
-            if (!PurchasedProducts.Any())
+
+            // Fallback if no orders exist
+            if (!PurchasedCategories.Any())
             {
-                // Pick 4 random products from the catalog
-                PurchasedProducts = await _dbContext.Products
-                    .OrderBy(p => Guid.NewGuid()) // random ordering
+                PurchasedCategories = await _dbContext.Products
+                    .OrderBy(p => Guid.NewGuid())
                     .Take(4)
-                    .Select(p => p.Name)
+                    .Select(p => p.Category)
                     .ToListAsync();
             }
+
 
             // Get all product names from the catalog
             var allProductNames = await _dbContext.Products
@@ -60,13 +61,15 @@ namespace Laekning.Pages
 
             // Call Azure Function to get recommended product names
             var recommendedNames = await _recommendationClient
-                .GetRecommendedProductsAsync(PurchasedProducts, allProductNames);
+                .GetRecommendedProductsAsync(PurchasedCategories, allProductNames);
 
             // Map recommended product names back to Product objects
             RecommendedProducts = await _dbContext.Products
-                .Where(p => recommendedNames.Contains(p.Name))
+                .Where(p => recommendedNames.Contains(p.Name) 
+					&& PurchasedCategories.Contains(p.Category)) // filter by category
 				.Take(5) // limit to 5 recommendations
                 .ToListAsync();
         }
     }
 }
+
