@@ -5,18 +5,17 @@ import logging
 from openai import AzureOpenAI
 from azure.identity import DefaultAzureCredential
 from azure.keyvault.secrets import SecretClient
-import pyodbc  # ensure pyodbc is imported for DB helper
 
 # -----------------------
 # DB Helper
 # -----------------------
 def get_all_products_from_db():
     try:
-        conn_str = SQL_CONN_STRING
+        conn_str=SQL_CONN_STRING  # Store in Azure Function App settings
         with pyodbc.connect(conn_str) as conn:
             cursor = conn.cursor()
-            cursor.execute("SELECT Name, Category FROM Products")  # include category
-            return [{"name": row[0], "category": row[1]} for row in cursor.fetchall()]
+            cursor.execute("SELECT Name FROM Products")  # adjust table/column
+            return [row[0] for row in cursor.fetchall()]
     except Exception as e:
         logging.error(f"DB error: {str(e)}")
         return []
@@ -36,7 +35,7 @@ def get_secret(name: str):
 @app.route(route="recommend", auth_level=func.AuthLevel.FUNCTION, methods=["POST"])
 def recommend(req: func.HttpRequest) -> func.HttpResponse:
     try:
-        # Load Azure OpenAI secrets
+        # Lazy load secrets
         AZURE_OPENAI_KEY = get_secret("AzureOpenAIDeploymentKeyTwo")
         AZURE_OPENAI_ENDPOINT = get_secret("AzureOpenAIEndpoint")
         AZURE_OPENAI_DEPLOYMENT = get_secret("AzureOpenAIDeploymentName")
@@ -47,42 +46,34 @@ def recommend(req: func.HttpRequest) -> func.HttpResponse:
             azure_endpoint=AZURE_OPENAI_ENDPOINT,
             api_version=AZURE_OPENAI_API_VERSION
         )
-
+    
         req_body = req.get_json()
-        purchased_categories = req_body.get("purchasedCategories", [])
-        all_products = req_body.get("allProducts", [])
+        purchased = req_body.get("purchasedProducts", [])
+        all_products = req_body.get("allDbProductNames", [])
 
-        # Fetch from DB if not provided
+        # If not passed, fetch from DB
         if not all_products:
             all_products = get_all_products_from_db()
 
-        if not purchased_categories or not all_products:
+        if not purchased or not all_products:
             return func.HttpResponse(
                 json.dumps({"recommendedProducts": []}),
                 status_code=200,
                 mimetype="application/json"
             )
 
-        # Filter products to purchased categories only
-        filtered_products = [p for p in all_products if p["category"] in purchased_categories]
-        if not filtered_products:
-            return func.HttpResponse(
-                json.dumps({"recommendedProducts": []}),
-                status_code=200,
-                mimetype="application/json"
-            )
+        purchased_str = ", ".join(purchased)
+        all_products_str = ", ".join(all_products)
 
-        # AI prompt using filtered products
-        product_names_str = ", ".join([p["name"] for p in filtered_products])
         prompt = (
-            f"You are a pharmacy assistant. Recommend 3–5 products from these categories: "
-            f"{', '.join(purchased_categories)}. "
-            f"Available products: {product_names_str}. "
-            f"Return exact product names from the list, separated by commas, no commentary."
+            f"You are a pharmacy assistant. A user has previously purchased these products: {purchased_str}. "
+            f"From the following available products: {all_products_str}, recommend 3–5 products that are in the same or related categories. "
+            f"Only return exact product names from the provided list, separated by commas. Do not include commentary or explanations."
         )
 
         logging.info(f"Prompt sent to Azure OpenAI: {prompt}")
 
+        # Call Azure OpenAI (non-streaming for simplicity)
         response = client.chat.completions.create(
             model=AZURE_OPENAI_DEPLOYMENT,
             messages=[{"role": "system", "content": prompt}]
@@ -91,14 +82,14 @@ def recommend(req: func.HttpRequest) -> func.HttpResponse:
         result_text = response.choices[0].message.content if response.choices else ""
         logging.info(f"Raw model output: {result_text}")
 
-        # Map AI output to exact product names
-        normalized_names = [p["name"].lower().strip() for p in filtered_products]
+        # Map model output to products (substring match)
+        normalized_products = [p.lower().strip() for p in all_products]
         recommended_products = []
         for rec in result_text.replace("\n", ",").split(","):
             rec_norm = rec.lower().strip()
-            for idx, name in enumerate(normalized_names):
-                if rec_norm == name:
-                    recommended_products.append(filtered_products[idx]["name"])
+            for idx, p in enumerate(normalized_products):
+                if rec_norm == p:  # exact match to avoid false positives
+                    recommended_products.append(all_products[idx])
                     break
 
         logging.info(f"Filtered recommended products: {recommended_products}")
@@ -116,3 +107,4 @@ def recommend(req: func.HttpRequest) -> func.HttpResponse:
             status_code=500,
             mimetype="application/json"
         )
+
