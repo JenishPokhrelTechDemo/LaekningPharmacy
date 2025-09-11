@@ -127,25 +127,25 @@ This project demonstrates **secure infrastructure, event-driven architecture, an
 
 9.      The function app then queries the actual product database to check if the product exists, which then gets displayed on the front page of the ASP.NET application.
 
-10.  All the activity of function app is monitored and logged in the application insights instance.
+10.     All the activity of function app is monitored and logged in the application insights instance.
 
-11.  Using the retrieved credentials in step 3, the ASP.NET application then calls the Document Intelligence Service for the OCR functionality.
+11.     Using the retrieved credentials in step 3, the ASP.NET application then calls the Document Intelligence Service for the OCR functionality.
 
-12.  After the Document Intelligence finishes with it’s OCR processes, it then calls the Azure OpenAI service to query the returned product names(in this case, drugs from the prescription) and displays the products in the application if available.
+12.     After the Document Intelligence finishes with it’s OCR processes, it then calls the Azure OpenAI service to query the returned product names(in this case, drugs from the prescription) and displays the products in the application if available.
 
-13.  Complementary to step 11, after the image is uploaded to blob storage for OCR analysis, the messages of the details identified about the image gets sent to event hubs to be consumed by an external service later on.
+13.     Complementary to step 11, after the image is uploaded to blob storage for OCR analysis, the messages of the details identified about the image gets sent to event hubs to be consumed by an external service later on.
 
-14.  Complementary to step 12, after the Azure OpenAI Service identifies the products in the database, the details of the products being identified and orders(just in case) gets sent to event hubs to be consumed by an external service later on.
+14.     Complementary to step 12, after the Azure OpenAI Service identifies the products in the database, the details of the products being identified and orders(just in case) gets sent to event hubs to be consumed by an external service later on.
 
-15.  For the health assistant chatbot, after the request is sent by the user in form of natural language prompt, the prompt is then sent to Azure OpenAI Service for analysis, which then queries the actual database to retrieve the products according to the user requirements and if successful, sends the results to be displayed in the ASP.NET application.
+15.     For the health assistant chatbot, after the request is sent by the user in form of natural language prompt, the prompt is then sent to Azure OpenAI Service for analysis, which then queries the actual database to retrieve the products according to the user requirements and if successful, sends the results to be displayed in the ASP.NET application.
 
-16.  The uploaded images and product purchases (along with all the new products created) are added into the SQL database.
+16.     The uploaded images and product purchases (along with all the new products created) are added into the SQL database.
 
-17.  The app service instance sends logs to Azure Monitor and Application Insights instance.
+17.     The app service instance sends logs to Azure Monitor and Application Insights instance.
 
-18.  The external C++ application that is to consume events uses it’s own managed identity to retrieve event hub credentials to consume events from Event Hubs.
+18.     The external C++ application that is to consume events uses it’s own managed identity to retrieve event hub credentials to consume events from Event Hubs.
 
-19.  The C++ application then consumes the events sent by the Event Hubs instance.
+19.     The C++ application then consumes the events sent by the Event Hubs instance.
 
 * * *
 
