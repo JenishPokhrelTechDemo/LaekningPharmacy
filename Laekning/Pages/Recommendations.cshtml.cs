@@ -23,8 +23,8 @@ namespace Laekning.Pages
             _recommendationClient = recommendationClient;
         }
 
-        // List of product categories recently purchased by users
-        public List<string> PurchasedCategories { get; set; } = new();
+        // List of description of products recently purchased by users
+        public List<string> PurchasedProductDescriptions { get; set; } = new();
 
         // List of recommended Product objects to display on the page
         public List<Product> RecommendedProducts { get; set; } = new();
@@ -33,23 +33,23 @@ namespace Laekning.Pages
         public async Task OnGetAsync()
         {
             // Get last 4 purchased product categories across all orders
-            PurchasedCategories = _repository.Orders
+            PurchasedProductDescriptions = _repository.Orders
                 .Include(o => o.Lines)
                 .ThenInclude(l => l.Product)
                 .OrderByDescending(o => o.OrderDate)
-                .SelectMany(o => o.Lines.Select(l => l.Product.Category))
+                .SelectMany(o => o.Lines.Select(l => l.Product.Description))
                 .Take(4) // take 4 most recent categories
                 .Distinct() // optional, remove duplicates
                 .ToList();
 
 
             // Fallback if no orders exist
-            if (!PurchasedCategories.Any())
+            if (!PurchasedProductDescriptions.Any())
             {
-                PurchasedCategories = await _dbContext.Products
+                PurchasedProductDescriptions = await _dbContext.Products
                     .OrderBy(p => Guid.NewGuid())
                     .Take(4)
-                    .Select(p => p.Category)
+                    .Select(p => p.Description)
                     .ToListAsync();
             }
 
@@ -61,12 +61,11 @@ namespace Laekning.Pages
 
             // Call Azure Function to get recommended product names
             var recommendedNames = await _recommendationClient
-                .GetRecommendedProductsAsync(PurchasedCategories, allProductNames);
+                .GetRecommendedProductsAsync(PurchasedProductDescriptions, allProductNames);
 
             // Map recommended product names back to Product objects
             RecommendedProducts = await _dbContext.Products
-                .Where(p => recommendedNames.Contains(p.Name) 
-					&& PurchasedCategories.Contains(p.Category)) // filter by category
+                .Where(p => recommendedNames.Contains(p.Name))
 				.Take(5) // limit to 5 recommendations
                 .ToListAsync();
         }

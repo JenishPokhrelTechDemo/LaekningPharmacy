@@ -22,7 +22,7 @@ namespace Laekning.Services
         }
 
         // Calls the Azure Function to get recommended products based on purchased products
-        public async Task<List<string>> GetRecommendedProductsAsync(List<string> purchasedCategories, List<string> allDbProductNames)
+        public async Task<List<string>> GetRecommendedProductsAsync(List<string> purchasedProductDescriptions, List<string> allDbProductNames)
         {
             // Get Key Vault URI from configuration
             string vaultUri = _config["AzureKeyVault:KeyVaultUrl"];
@@ -39,7 +39,7 @@ namespace Laekning.Services
             // Prepare payload to send to the Azure Function
             var payload = new
             {
-                purchasedCategories,    // List of products the user already purchased
+                purchasedProductDescriptions,    // List of description of products the user already purchased
                 allDbProductNames     // List of all products in the database
             };
 
