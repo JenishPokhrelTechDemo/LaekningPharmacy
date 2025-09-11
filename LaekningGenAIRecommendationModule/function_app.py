@@ -3,6 +3,7 @@ import json
 import os
 import logging
 import pyodbc
+import difflib
 from openai import AzureOpenAI  # Azure OpenAI SDK
 from azure.identity import DefaultAzureCredential  # Authentication helper
 from azure.keyvault.secrets import SecretClient  # Access Key Vault secrets
@@ -102,8 +103,8 @@ def recommend(req: func.HttpRequest) -> func.HttpResponse:
         # Construct the prompt for Azure OpenAI
         prompt = (
             f"You are a pharmacy assistant. A user has previously purchased these products: {purchased_str}. "
-            f"Adding to and including {purchased_str}, from the following available products: {all_products_str}, recommend 3–5 products that belong "
-            f"to the same exact categories as the purchased products. "
+            f"Adding to and including {purchased_str}, from the following available products: {all_products_str}, "
+            f"recommend 3–5 products that belong to the same exact categories as the purchased products. "
             f"Only return exact product names from the provided list, separated by commas. "
             f"Do not include commentary or explanations."
         )
@@ -120,17 +121,33 @@ def recommend(req: func.HttpRequest) -> func.HttpResponse:
         result_text = response.choices[0].message.content if response.choices else ""
         logging.info(f"Raw model output: {result_text}")
 
-        # Normalize product names for exact matching
+        # Normalize product names for exact/fuzzy matching
         normalized_products = [p["name"].lower().strip() for p in all_products]
-        recommended_products = []
+        recommended_products = set()  # use set to avoid duplicates
 
-        # Split AI output and filter exact matches
+        # Ensure purchased products are included
+        for p in purchased:
+            recommended_products.add(p)
+
+        # Split AI output and filter matches
         for rec in result_text.replace("\n", ",").split(","):
             rec_norm = rec.lower().strip()
-            for idx, p in enumerate(normalized_products):
-                if rec_norm == p:
-                    recommended_products.append(all_products[idx]["name"])
-                    break
+            if not rec_norm:
+                continue
+
+            # Try exact match first
+            if rec_norm in normalized_products:
+                idx = normalized_products.index(rec_norm)
+                recommended_products.add(all_products[idx]["name"])
+                continue
+
+            # Fallback: fuzzy match (>= 0.85 similarity)
+            closest = difflib.get_close_matches(rec_norm, normalized_products, n=1, cutoff=0.85)
+            if closest:
+                idx = normalized_products.index(closest[0])
+                recommended_products.add(all_products[idx]["name"])
+
+        recommended_products = list(recommended_products)
 
         logging.info(f"Filtered recommended products: {recommended_products}")
 
