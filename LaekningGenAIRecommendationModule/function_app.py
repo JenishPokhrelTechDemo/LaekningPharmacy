@@ -67,7 +67,7 @@ def recommend(req: func.HttpRequest) -> func.HttpResponse:
 
         prompt = (
             f"You are a pharmacy assistant. A user has previously purchased these product categories: {purchased_str}. "
-            f"From the following available products: {all_products_str}, recommend 3–5 products that are in the same categories. "
+            f"From the following available products: {all_products_str}, recommend products that are in the same categories. "
             f"Only return exact product names from the provided list, separated by commas. Do not include commentary or explanations."
         )
 
