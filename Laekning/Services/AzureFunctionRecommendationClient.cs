@@ -22,58 +22,47 @@ namespace Laekning.Services
         }
 
         // Calls the Azure Function to get recommended products based on purchased products
-        public async Task<List<string>> GetRecommendedProductsAsync(List<string> purchasedProducts, List<string> allDbProductNames)
-        {
-            // Get Key Vault URI from configuration
-            string vaultUri = _config["AzureKeyVault:KeyVaultUrl"];
-            
-            // Create a Key Vault client using managed identity or default credential
-            var client = new SecretClient(new Uri(vaultUri), new DefaultAzureCredential());
+        public async Task<List<string>> GetRecommendedProductsAsync	(List<Product> purchasedProducts, List<Product> allDbProducts)
+		{
+			// Key Vault retrieval code remains the same
+			string vaultUri = _config["AzureKeyVault:KeyVaultUrl"];
+			var client = new SecretClient(new Uri(vaultUri), new DefaultAzureCredential());
+			var functionUrl = client.GetSecret("AzureFunctionsRecommendUrl").Value;
+    
+			// Build payloads with name + category
+			var purchasedPayload = purchasedProducts
+				.Select(p => new { name = p.Name, category = p.Category })
+				.ToList();
 
-            // Retrieve the Azure Function URL stored in Key Vault
-            KeyVaultSecret secretAzureFunctionsRecommendrl = client.GetSecret("AzureFunctionsRecommendUrl");
-            var functionUrl = secretAzureFunctionsRecommendrl.Value;  // URL of the recommendation function
-            
-            var functionKey = "";  // Optional function key for authentication if needed
+			var allProductsPayload = allDbProducts
+				.Select(p => new { name = p.Name, category = p.Category })
+				.ToList();
 
-            // Prepare payload to send to the Azure Function
-            var payload = new
-            {
-                purchasedProducts,    // List of products the user already purchased
-                allDbProductNames     // List of all products in the database
-            };
+			var payload = new
+			{
+				purchasedProducts = purchasedPayload,
+				allProducts = allProductsPayload
+			};
 
-            // Create an HTTP POST request with JSON payload
-            var request = new HttpRequestMessage(HttpMethod.Post, functionUrl)
-            {
-                Content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json")
-            };
+			// Send POST request
+			var request = new HttpRequestMessage(HttpMethod.Post, functionUrl)
+			{
+				Content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json")
+			};
 
-            // Include the function key in the request headers if required
-            if (!string.IsNullOrEmpty(functionKey))
-            {
-                request.Headers.Add("x-functions-key", functionKey);
-            }
+			var response = await _httpClient.SendAsync(request);
+			response.EnsureSuccessStatusCode();
 
-            // Send the request to the Azure Function
-            var response = await _httpClient.SendAsync(request);
-            response.EnsureSuccessStatusCode(); // Throws exception if status code is not success
+			var json = await response.Content.ReadAsStringAsync();
+			var doc = JsonDocument.Parse(json);
 
-            // Read the JSON response
-            var json = await response.Content.ReadAsStringAsync();
+			if (doc.RootElement.TryGetProperty("recommendedProducts", out var recs))
+			{
+				return recs.EnumerateArray().Select(e => e.GetString() ?? "").ToList();
+			}
 
-            // Parse the JSON response
-            var doc = JsonDocument.Parse(json);
+			return new List<string>();
+		}
 
-            // Extract the "recommendedProducts" array from the response
-            if (doc.RootElement.TryGetProperty("recommendedProducts", out var recs))
-            {
-                // Convert JSON array to a List<string>
-                return recs.EnumerateArray().Select(e => e.GetString() ?? "").ToList();
-            }
-
-            // Return empty list if no recommendations found
-            return new List<string>();
-        }
     }
 }
