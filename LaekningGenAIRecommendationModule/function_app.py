@@ -91,7 +91,7 @@ def recommend(req: func.HttpRequest) -> func.HttpResponse:
         prompt = (
             f"You are a pharmacy assistant. A user has previously purchased these products: {purchased_str}. "
             f"From the following available products: {all_products_str}, recommend 3–5 products that are in the same exact categories. "
-            f"Only return exact product names from the provided list, separated by commas. Do not include commentary or explanations."
+            f"Only return exact product names from the provided list, separated by commas. Do not include commentary or explanations. Products from {purchased_str} are also allowed to be included."
         )
 
         logging.info(f"Prompt sent to Azure OpenAI: {prompt}")
