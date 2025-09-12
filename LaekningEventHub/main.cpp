@@ -20,7 +20,7 @@ int main()
     std::cout << "Starting Program!" << std::endl;
 
     // Key Vault URL containing secrets for Event Hub connection
-    auto const keyVaultUrl = "https://laekningtestkeyvault.vault.azure.net/";
+    auto const keyVaultUrl = ""; //You can add key vault Url here. But it's better to pass it as an environment variable
 
     // Create a chained credential: try Managed Identity first, fallback to Azure CLI credential
     auto credential = std::make_shared<Azure::Identity::ChainedTokenCredential>(

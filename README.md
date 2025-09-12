@@ -62,8 +62,9 @@ This project demonstrates **secure infrastructure, event-driven architecture, an
 
 1.  Clone repository
 2.  Configure Azure resources (Key Vault, Event Hubs, Managed identities, Storage Accounts, Azure SQL Database, etc.)
-3.  Add required API links and secrets to the Key Vault
-4.  Either configure and adjust environment variables in Azure DevOps and run the pipeline or run the three modules manually
+3.  Add Key Vault Url in appsettings.json of the ASP.NET Core Application(not recommended) and main.cpp of the C++ event hub consumer application(not recommended) or pass it as an environment variable for both. 
+4.  Add required API links and secrets to the Key Vault
+5.  Either configure and adjust environment variables in Azure DevOps and run the pipeline or run the three modules manually
 
 * * *
 
