@@ -44,15 +44,14 @@ namespace Laekning.Controllers {
                 // Prepare order event payload
                 var orderEvent = new {
                     EventType = "OrderPlaced",
-                    OrderId = order.OrderID,
+                    OrderId = order.OrderID.ToString(),
                     Customer = order.Name,
                     ItemCount = order.Lines.Count,
                     OrderDate = order.OrderDate,
                     GiftWrap = order.GiftWrap
                 };
 
-                // Serialize payload and send to Event Hub
-                string payload = JsonSerializer.Serialize(orderEvent);
+                // send to Event Hub            
                 await eventHubSender.SendAsync(payload);
 
                 // Clear the cart after order completion
