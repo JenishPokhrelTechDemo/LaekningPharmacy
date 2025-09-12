@@ -52,7 +52,7 @@ namespace Laekning.Controllers {
                 };
 
                 // Serialize payload and send to Event Hub
-                object payload = JsonSerializer.Serialize(orderEvent);
+                string payload = JsonSerializer.Serialize(orderEvent);
                 await eventHubSender.SendAsync(payload);
 
                 // Clear the cart after order completion
