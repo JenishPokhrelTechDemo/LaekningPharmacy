@@ -152,6 +152,8 @@ This project demonstrates **secure infrastructure, event-driven architecture, an
 
 ## Demo Video
 
+[Link to the demo video](https://youtu.be/amo5rdLA27Q)
+
 * * *
 
 ## Future Scope
