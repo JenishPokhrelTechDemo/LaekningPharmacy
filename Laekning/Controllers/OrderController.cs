@@ -52,7 +52,7 @@ namespace Laekning.Controllers {
                 };
 
                 // send to Event Hub            
-                await eventHubSender.SendAsync(payload);
+                await eventHubSender.SendAsync(orderEvent);
 
                 // Clear the cart after order completion
                 cart.Clear();
